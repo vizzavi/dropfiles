@@ -1,0 +1,36 @@
+version: '3.1'
+services:
+    database:
+        image: 'postgres:16-alpine'
+        working_dir: /app
+        volumes:
+            - database_data:/var/lib/postgresql/data:rw
+            - '.:/app'
+        environment:
+            POSTGRES_DB: ${POSTGRES_DB}
+            POSTGRES_USER: ${POSTGRES_USER}
+            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+        ports:
+            - '5432:5432'
+
+    webserver:
+        image: 'nginx:alpine'
+        working_dir: /app
+        volumes:
+            - '.:/app'
+            - './docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf'
+        ports:
+            - '8080:80'
+
+    php-fpm:
+        container_name: php-dropfiles
+        build: docker/php-fpm
+        working_dir: /app
+        volumes:
+            - '.:/app'
+            - './docker/php-fpm/php-ini-overrides.ini:/etc/php/8.3/fpm/conf.d/99-overrides.ini'
+        environment:
+            PHP_IDE_CONFIG: "serverName=dropfiles"
+
+volumes:
+    database_data:
