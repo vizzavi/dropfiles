@@ -84,12 +84,12 @@ class Video
         return $this;
     }
 
-    public function getSizeInBytes(): ?int
+    public function getSize(): ?int
     {
         return $this->size;
     }
 
-    public function setSizeInBytes(int $sizeInBytes): self
+    public function setSize(int $sizeInBytes): self
     {
         $this->size = $sizeInBytes;
 

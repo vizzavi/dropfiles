@@ -1,0 +1,54 @@
+{% block field %}
+    {% if field.value is empty %}
+        <div class="alert alert-info">
+            {{ 'Видео отсутствуют' }}
+        </div>
+    {% else %}
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Ссылка</th>
+            <th>Название</th>
+            <th>Превью</th>
+            <th>Дата создания</th>
+            <th>Дата удаления</th>
+            <th>В корзине</th>
+            <th>Просмотры</th>
+            <th>Скачано раз</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for video in field.value %}
+            <tr>
+                <td>
+                    <a href="{{ path('admin', { crudAction: 'detail', crudControllerFqcn: 'App\\Controller\\Admin\\VideoController', entityId: video.uuid }) }}">
+                        Видео
+                    </a>
+                </td>
+                <td>{{ video.name }}</td>
+                <td>
+                    <img src="{{ asset(video.imagePreview) }}" alt="{{ video.name }}" style="width: 100px; height: auto;">
+                </td>
+                <td>{{ video.createdAt | date('Y-m-d H:i:s')}}</td>
+                <td>{{ video.deletionDate ? video.deletionDate|date('Y-m-d H:i:s') : '---' }}</td>
+                <td>{{ video.deleteFlag == 1 ? 'Да' : 'Нет' }}</td>
+                <td>{{ video.views }}</td>
+                <td>{{ video.downloads }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+{% endblock %}
+
+{#{% extends '@EasyAdmin/crud/field/array.html.twig' %}#}
+
+{#{% block field %}#}
+{#    {% if field.value is empty %}#}
+{#        <div class="alert alert-info">#}
+{#            {{ 'Видео отсутствуют' }}#}
+{#        </div>#}
+{#    {% else %}#}
+{#        {{ include('@EasyAdmin/includes/field_collection.html.twig') with { field: field } only }}#}
+{#    {% endif %}#}
+{#{% endblock %}#}

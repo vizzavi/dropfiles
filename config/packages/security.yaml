@@ -12,11 +12,15 @@ security:
     firewalls:
         admin:
             pattern: ^/admin
-            stateless: true
+#            stateless: false
             provider: app_user_provider
             custom_authenticators:
                 - App\Security\TokenAuthenticator
             entry_point: App\Security\TokenAuthenticator
+            logout:
+                path: /admin/logout
+                target: /
+
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false

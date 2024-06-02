@@ -4,6 +4,7 @@ namespace App\Security;
 
 use App\Entity\User;
 use App\Repository\UserRepository;
+use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
@@ -87,9 +88,10 @@ readonly class TokenAuthenticator implements AuthenticatorInterface, Authenticat
 
         try {
             Uuid::fromString($token);
-        } catch (\Throwable) {
+        } catch (InvalidArgumentException) {
             throw new CustomUserMessageAuthenticationException('Invalid token format');
         }
+
         $admin = $this->userRepository->findOneBy(['token' => $token]);
 
         if ($admin === null) {
