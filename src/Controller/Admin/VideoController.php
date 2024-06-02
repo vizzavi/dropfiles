@@ -39,7 +39,7 @@ class VideoController extends AbstractCrudController
             DateTimeField::new('createdAt')
                          ->setLabel('Дата создания видео')
                          ->setDisabled(),
-            DateTimeField::new('DeletionData')
+            DateTimeField::new('deletionDate')
                          ->setLabel('Дата удаления'),
             NumberField::new('views')
                        ->setDisabled()
