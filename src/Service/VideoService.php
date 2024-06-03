@@ -39,12 +39,12 @@ readonly class VideoService
             '-movflags', '+faststart', # Оптимизация для прогрессивной загрузки
         ]);
 
-        $video->save($format, $outputPath . 'video.mp4');
+        $video->save($format, $outputPath . '/video.mp4');
     }
 
     public function createVideoPoster(Video $video, string $outputPath): void
     {
-        $posterPath = $outputPath . 'poster.jpg';
+        $posterPath = $outputPath . '/poster.jpg';
 
         $frame = $video->frame(TimeCode::fromSeconds(1));
         $frame->save($posterPath);
