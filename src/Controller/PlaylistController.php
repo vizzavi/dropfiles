@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Form\PlaylistType;
+use App\Message\Video\VideoProcessingMessege;
 use App\Service\PlaylistService;
 use App\Service\VideoService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -10,6 +11,7 @@ use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Uid\Uuid;
 
@@ -22,9 +24,11 @@ class PlaylistController extends AbstractController
     }
 
     #[Route('/', name: 'app_playlist')]
-    public function index(Request $request): Response
+    public function index(Request $request, MessageBusInterface $bus): Response
     {
         $playlistId = $this->playlistService->generatePlaylistId($request->getSession());
+
+        echo "<h1>Playlist: $playlistId</h1>";
 
         $form = $this->createForm(PlaylistType::class, null, [
             'playlistId' => $playlistId,
@@ -53,11 +57,16 @@ class PlaylistController extends AbstractController
                         $this->addFlash('success', 'File successfully uploaded!');
 
 
-                        // TODO: закинуть в шину для Обработки в очереди
-                        $this->videoService->convertVideo(
+                        $videoMessage = new VideoProcessingMessege(
+                            $videoID,
+                            $playlistId,
                             $destination . '/' . $videoID . '/input/' . $newFilename,
                             $destination . '/' . $videoID,
+                            $newFilename,
+                            $storageDuration
                         );
+
+                        $bus->dispatch($videoMessage);
                     } catch (FileException $e) {
                         $this->addFlash('error', 'Failed to upload file.');
                         dd('Error: ' . $e->getMessage());

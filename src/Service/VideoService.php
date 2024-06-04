@@ -22,12 +22,16 @@ readonly class VideoService
     {
     }
 
-    public function convertVideo(string $inputPath, string $outputPath): void
+    public function proccesVideo(string $inputPath, string $outputPath): void
     {
         $video = $this->ffmpeg->open($inputPath);
 
+        $this->convertVideo($video, $outputPath);
         $this->createVideoPoster($video, $outputPath);
+    }
 
+    public function convertVideo(Video $video, string $outputPath): void
+    {
         // Настройка формата для сжатия видео
         $format = new X264();
         $format->setKiloBitrate(1000); // Установка битрейта
