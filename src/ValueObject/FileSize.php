@@ -4,12 +4,12 @@ namespace App\ValueObject;
 
 class FileSize
 {
-    const string UNIT_BYTE     = 'B';
-    const string UNIT_KILOBYTE = 'KB';
-    const string UNIT_MEGABYTE = 'MB';
-    const string UNIT_GIGABYTE = 'GB';
+    public const string UNIT_BYTE     = 'B';
+    public const string UNIT_KILOBYTE = 'KB';
+    public const string UNIT_MEGABYTE = 'MB';
+    public const string UNIT_GIGABYTE = 'GB';
 
-    public function __construct(private $value, private $unit)
+    public function __construct(private readonly float|int $value, private readonly string $unit)
     {
     }
 
@@ -24,16 +24,26 @@ class FileSize
         };
     }
 
-    public function convertTo($targetUnit): float|int
+    public function convertTo($targetUnit): int|float
     {
         $bytes = $this->toBytes();
 
         return match ($targetUnit) {
             self::UNIT_BYTE     => $bytes,
             self::UNIT_KILOBYTE => $bytes / 1024,
-            self::UNIT_MEGABYTE => $bytes / (1024 * 1024),
-            self::UNIT_GIGABYTE => $bytes / (1024 * 1024 * 1024),
+            self::UNIT_MEGABYTE => round($bytes / (1024 * 1024), 1),
+            self::UNIT_GIGABYTE => round($bytes / (1024 * 1024 * 1024), 1),
             default             => throw new \InvalidArgumentException("Invalid target unit provided"),
         };
+    }
+
+    public function getValue(): float|int
+    {
+        return $this->value;
+    }
+
+    public function getUnit(): string
+    {
+        return $this->unit;
     }
 }

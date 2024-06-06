@@ -2,24 +2,14 @@
 
 namespace App\Form;
 
+use App\Enum\FileLifeTime;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
-use Symfony\Component\Form\Extension\Core\Type\RadioType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\UX\Dropzone\Form\DropzoneType;
-
-//        DropzoneMultipleType
-//        DropzoneType
-# TODO: playlistId в верхнем записать.
-//                    'data-controller' => 'dropzone',
-//                    'data-dropzone-max-filesize-value' => '10', // Максимальный размер файла в мегабайтах
-//                    'data-dropzone-max-files-value' => '10', // Максимальное количество файлов
-//                    'data-dropzone-accepted-files-value' => '.png,.jpg,.jpeg,.gif', // Разрешенные типы файлов
-//                    'data-dropzone-url-value' => '/playlist/upload', // URL для загрузки файлов
 
 class PlaylistType extends AbstractType
 {
@@ -38,9 +28,9 @@ class PlaylistType extends AbstractType
             ->add('storageDuration', ChoiceType::class, [
                 'label' => ' ',
                 'choices' => [
-                    '6 МЕСЯЦЕВ' => '6 month',
-                    '1 ГОД' => '1 year',
-                    'БЕССРОЧНО' => 'forever',
+                    '6 МЕСЯЦЕВ' => FileLifeTime::sixMonth->value,
+                    '1 ГОД'     => FileLifeTime::oneYear->value,
+                    'БЕССРОЧНО' => FileLifeTime::forever->value,
                 ],
                 'expanded' => true,
                 'required' => true,

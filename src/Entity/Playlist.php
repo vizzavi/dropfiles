@@ -15,8 +15,6 @@ class Playlist
 {
     #[ORM\Id]
     #[ORM\Column(type: UuidType::NAME, length: 180, unique: true)]
-    #[ORM\GeneratedValue(strategy: 'CUSTOM')]
-    #[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]
     private ?Uuid $uuid = null;
 
     #[ORM\Column]

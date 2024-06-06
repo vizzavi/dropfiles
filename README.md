@@ -9,7 +9,7 @@
 Будет создан токен, указав его можно зайти в админ панель.
 
 Пример
-сайт.com/admin?token=a42f15ef-911f-48d3-9bb3-4d2ae5c27fd4
+http://localhost:8080/admin?token=9730c71e-7f7e-4b03-8bda-47f83fe78fce
 
 ---
 

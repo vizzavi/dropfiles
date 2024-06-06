@@ -22,7 +22,7 @@ readonly class VideoService
     {
     }
 
-    public function proccesVideo(string $inputPath, string $outputPath): void
+    public function processVideo(string $inputPath, string $outputPath): void
     {
         $video = $this->ffmpeg->open($inputPath);
 
@@ -34,13 +34,17 @@ readonly class VideoService
     {
         // Настройка формата для сжатия видео
         $format = new X264();
-        $format->setKiloBitrate(1000); // Установка битрейта
+        $format->setKiloBitrate(800); // Установка битрейта
         $format->setAudioCodec('aac'); // Установка аудио кодека
         $format->setAdditionalParameters([
-            '-vf', 'scale=1280:-2',    # Изменение разрешения до 720p
-            '-r', '30',                # Фиксированный фреймрейт 30 fps
-            '-preset', 'fast',         # Пресет сжатия
-            '-movflags', '+faststart', # Оптимизация для прогрессивной загрузки
+            '-vf', 'scale=1280:-2',    // Изменение разрешения до 720p
+            '-r', '30',                // Фиксированный фреймрейт 30 fps
+            '-preset', 'veryfast',     // Пресет сжатия
+            '-movflags', '+faststart', // Оптимизация для прогрессивной загрузки
+            '-crf', '29',              // Контрольный параметр качества (снизить значение для лучшего качества, повысить для меньшего размера)
+            '-maxrate', '800k',        // Максимальный битрейт
+            '-bufsize', '1600k',       // Размер буфера
+            '-pix_fmt', 'yuv420p',     // Формат пикселей
         ]);
 
         $video->save($format, $outputPath . '/video.mp4');
