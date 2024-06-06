@@ -14,11 +14,9 @@ readonly class VideoProcessingHandler
 
     public function __invoke(VideoProcessingMessege $message): void
     {
-        file_put_contents('r.txt', serialize($message));
-
         $input = $message->videoInputPath;
         $output = $message->videoOutputPath;
 
-        $this->videoService->proccesVideo($input, $output);
+        $this->videoService->processVideo($input, $output);
     }
 }

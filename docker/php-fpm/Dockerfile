@@ -8,6 +8,7 @@ RUN apt-get update \
         php8.3-intl \
         php8.3-imagick \
         php8.3-amqp \
+        php8.3-redis \
         ffmpeg \
         imagemagick \
     && apt-get clean \

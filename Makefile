@@ -36,3 +36,13 @@ restart-%:
 # Просмотр логов конкретного сервиса
 logs-%:
 	docker compose logs -f $*
+
+messenger:
+	 bin/console messenger:consume async -vv
+
+# & вроде если в конец добавить то в фоне будет запускаться,
+	# а сообще там штуки специальные для запуска в фоне
+# docker-compose exec php-fpm php bin/console messenger:consume async -vv
+
+#docker compose exec php-fpm bash
+#docker compose exec php-fpm bin/console
