@@ -20,4 +20,136 @@
         <div class="alert alert-danger">{{ message }}</div>
     {% endfor %}
 
+    <section class="air-file">
+
+        <div class="air-file__container">
+
+            <div class="air-file__logo">
+                <img src="{{ asset('img/download.png') }}" alt="download davinci file" class="air-file__logo-img">
+                <span class="air-file__logo-name">DaVinci</span>
+            </div>
+
+            <div class="air-file__upload">
+                <div class="air-file__upload-title">
+                    Загружай<br>
+                    видео
+                </div>
+                <div class="air-file__upload-desc">
+                    для вставки видео,
+                    из буфера обмена
+                    нажмите CTRL+V
+                </div>
+            </div>
+
+            <div class="air-file__progress">
+
+                <div class="air-file__progress-details">
+
+                    <div class="air-file__progress-details-left">
+
+                        <img src="{{ asset('img/time-icon.png') }}" alt="" class="air-file__progress-details-icon">
+
+                        <div class="air-file__progress-details-block">
+                            <div class="air-file__progress-details-time">00:00:04</div>
+                            <div class="air-file__progress-details-down">
+                                до окончания<br>
+                                загрузки
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="air-file__progress-hr"></div>
+
+                    <div class="air-file__progress-details-right">
+                        <div class="air-file__progress-details-count">3</div>
+                        <div class="air-file__progress-details-text">файла</div>
+                        <div class="air-file__progress-details-size">34.7 мб</div>
+                        <div class="air-file__progress-details-text">общий размер</div>
+                    </div>
+                </div>
+
+                <div class="air-file__progress-percent">
+                    <div class="air-file__progress-bar" style="width: 62%"></div>
+                    <div class="air-file__progress-percent-number">62%</div>
+                </div>
+
+            </div>
+
+            <div class="air-file__last">
+
+                <div class="air-file__count">
+
+                    <img src="{{ asset('img/time-dark.png') }}" class="air-file__count-img" alt="">
+
+                    <div class="air-radio-group">
+                        <input type="radio" id="air-radio1" name="air-duration" value="6" checked>
+                        <label for="air-radio1">6 месяцев</label>
+
+                        <input type="radio" id="air-radio2" name="air-duration" value="12">
+                        <label for="air-radio2">1 год</label>
+
+                        <input type="radio" id="air-radio3" name="air-duration" value="infinity">
+                        <label for="air-radio3">бессрочно</label>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <footer class="air-section">
+
+        <div class="air-section__title">
+            Ваша ссылка для скачивания:
+        </div>
+
+        <div class="air-section__download-link">
+
+            <img src="{{ asset('img/сopy-icon.png') }}" alt="ссылка для скачивания" class="air-download-link__icon">
+
+            <div class="air-download-link__url">{{ link_for_downloading }}</div>
+
+            <div class="air-download-link__copy">Скопировать</div>
+
+        </div>
+
+
+        <div class="air-section__processing">
+            Происходит обработка видеофайлов
+        </div>
+
+        <div class="air-section__files">
+
+            <div class="air-files__item">
+                <button href="#" class="air-item__icon" title="скачать файл">
+                    <img src="{{ asset('img/download-icon.png') }}" alt="">
+                </button>
+                <a href="#" class="air-files__link">
+                    <img src="{{ asset('img/play.png') }}" alt="" class="air-item__img-play">
+                    <img src="{{ asset('img/item-1.png') }}" alt="" class="air-item__image">
+                    <h3 class="air-item__title">Trailer_volk_s_w-s.mp4</h3>
+                </a>
+            </div>
+
+            <div class="air-files__item loading">
+                <h3 class="air-item__title">davincimovie.mp4</h3>
+            </div>
+
+            <div class="air-files__item loading">
+                <h3 class="air-item__title">dvmovie2.mp4</h3>
+            </div>
+
+        </div>
+
+        <p class="air-section__description">
+            FILES.DAVINCI.PM - бесплатный сервис мгновенного обмена видео.
+            Без регистрации, скорость загрузки и скачивания не ограничена.
+        </p>
+
+    </footer>
+
 {% endblock %}

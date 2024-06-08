@@ -2,13 +2,20 @@
 
 namespace App\Controller;
 
+use App\Entity\Playlist;
+use App\Entity\Video;
+use App\Enum\FileLifeTime;
 use App\Form\PlaylistType;
 use App\Message\Video\VideoProcessingMessege;
+use App\Repository\PlaylistRepository;
 use App\Service\PlaylistService;
-use App\Service\VideoService;
+use App\ValueObject\FileSize;
+use DateTimeImmutable;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -18,8 +25,9 @@ use Symfony\Component\Uid\Uuid;
 class PlaylistController extends AbstractController
 {
     public function __construct(
-        private readonly VideoService $videoService,
         private readonly PlaylistService $playlistService,
+        private readonly EntityManagerInterface $entityManager,
+        private readonly PlaylistRepository $playlistRepository,
     ) {
     }
 
@@ -27,59 +35,111 @@ class PlaylistController extends AbstractController
     public function index(Request $request, MessageBusInterface $bus): Response
     {
         $playlistId = $this->playlistService->generatePlaylistId($request->getSession());
-
-        echo "<h1>Playlist: $playlistId</h1>";
+//        echo "<h1>Playlist: $playlistId</h1>";
 
         $form = $this->createForm(PlaylistType::class, null, [
             'playlistId' => $playlistId,
         ]);
-
         $form->handleRequest($request);
 
+        # TODO: Будет другая загрузка через Ajax
         if ($form->isSubmitted() && $form->isValid()) {
             $storageDuration = $form->getData()['storageDuration'];
-            $playlistId = $form->getData()['playlistId'];
-            $uploadedFiles = $form->get('files')->getData();
+            $playlistId      = $form->getData()['playlistId'];
+            $uploadedFiles   = $form->get('files')->getData();
 
             if ($uploadedFiles) {
                 $destination = $this->getParameter('kernel.project_dir') . '/uploads/private/' . $playlistId;
 
-                # TODO: Тут создать сущность плейлиста
+                $deletionDate = FileLifeTime::from($storageDuration)->getDate();
+
+                $playlistUuid = Uuid::fromString($playlistId);
+
+                $playlist = $this->entityManager->getRepository(Playlist::class)->findOneBy(['uuid' => $playlistUuid]);
+
+                if (!$playlist) {
+                    $playlist = (new Playlist())
+                        ->setUuid($playlistUuid)
+                        ->setCreatedAt(new DateTimeImmutable())
+                        ->setDeletionData($deletionDate)
+                        ->setPageViewed(0)
+                        ->setDeleteFlag(false)
+                    ;
+                    $this->entityManager->persist($playlist);
+                }
 
                 foreach ($uploadedFiles as $uploadedFile) {
-                    $videoID = Uuid::v4();
+                    $videoID          = Uuid::v4();
                     $originalFilename = pathinfo($uploadedFile->getClientOriginalName(), PATHINFO_FILENAME);
-                    $newFilename = $originalFilename . '.' .  $uploadedFile->guessExtension();
+                    $newFilename      = $originalFilename . '.' . $uploadedFile->guessExtension();
 
                     try {
                         $uploadedFile->move($destination . '/' . $videoID . '/input', $newFilename);
-                        # TODO: Тут создать сущность видео
-                        $this->addFlash('success', 'File successfully uploaded!');
 
+                        $uploadedFileSize     = new FileSize($uploadedFile->getSize(), FileSize::UNIT_BYTE);
+                        $uploadedFileSizeInKB = $uploadedFileSize->convertTo(FileSize::UNIT_KILOBYTE);
+
+                        $video = (new Video())
+                            ->setPlaylist($playlist)
+                            ->setCreatedAt(new DateTimeImmutable())
+                            ->setName($newFilename)
+                            ->setUuid($videoID)
+                            ->setDeletionDate($deletionDate)
+                            ->setViews(0)
+                            ->setDeleteFlag(false)
+                            ->setSize($uploadedFileSizeInKB)
+                            ->setDownloads(0)
+                            ->setImagePreview(null)
+                            ->setPath($destination . '/' . $videoID . '/input', $newFilename)
+                        ;
+
+                        $this->entityManager->persist($video);
 
                         $videoMessage = new VideoProcessingMessege(
                             $videoID,
                             $playlistId,
                             $destination . '/' . $videoID . '/input/' . $newFilename,
-                            $destination . '/' . $videoID,
-                            $newFilename,
-                            $storageDuration
+                            $destination . '/' . $videoID, $newFilename, $storageDuration
                         );
-
                         $bus->dispatch($videoMessage);
                     } catch (FileException $e) {
                         $this->addFlash('error', 'Failed to upload file.');
                         dd('Error: ' . $e->getMessage());
                     }
                 }
+
+                $this->entityManager->flush();
             }
 
             return $this->redirectToRoute('app_upload_success');
         }
 
         return $this->render('playlist/index.html.twig', [
-            'controller_name' => 'PlaylistController',
+            'link_for_downloading' => 'https://files.davinci.pm/' . $playlistId,
             'form' => $form->createView(),
+        ]);
+    }
+
+    #[Route('/{playlistId}', name: 'app_show_playlist', methods: ['GET'])]
+    public function show(Request $request, string $playlistId): Response
+    {
+        $playlist = $this->playlistRepository->findOneBy(['uuid' => $playlistId]);
+
+        if (! $playlist) {
+            throw $this->createNotFoundException('The playlist does not exist');
+        }
+
+        $videos = $playlist->getVideos();
+
+//        dd($playlist->getDeletionData());
+
+//        echo 'count - '  . $videos->count();
+//        dd($videos->getValues());
+
+        // Show playlist
+
+        return $this->render('playlist/playlist.html.twig', [
+            'playlist' => $playlist,
         ]);
     }
 
@@ -99,9 +159,9 @@ class PlaylistController extends AbstractController
         $files = $request->files->get('files');
 
 
-//        Можно в трай кетч поместить и вообще с танзакцией
-//        Если выбирает ошибка на uniq в бд сделать ролбек или в кетч добавить дату сегодня в тайм стемх хз
-//        Что бы перед каждым сохданием не спраивать бд
+        //        Можно в трай кетч поместить и вообще с танзакцией
+        //        Если выбирает ошибка на uniq в бд сделать ролбек или в кетч добавить дату сегодня в тайм стемх хз
+        //        Что бы перед каждым сохданием не спраивать бд
 
         if (!$files) {
             return new JsonResponse(['error' => 'No files uploaded'], 400);
@@ -111,22 +171,20 @@ class PlaylistController extends AbstractController
 
         $uploadedFiles = [];
         foreach ($files as $file) {
-//            if ($file->getSize() > 10 * 1024 * 1024) { // Проверка размера файла (10 МБ)
-//                return new JsonResponse(['error' => sprintf('File %s is too large.', $file->getClientOriginalName())], 400);
-//            }
+            //            if ($file->getSize() > 10 * 1024 * 1024) { // Проверка размера файла (10 МБ)
+            //                return new JsonResponse(['error' => sprintf('File %s is too large.', $file->getClientOriginalName())], 400);
+            //            }
 
-//            if (!in_array($file->getMimeType(), ['image/png', 'image/jpeg', 'image/gif'])) { // Проверка типа файла
-//                return new JsonResponse(['error' => sprintf('File %s has an invalid file type.', $file->getClientOriginalName())], 400);
-//            }
+            //            if (!in_array($file->getMimeType(), ['image/png', 'image/jpeg', 'image/gif'])) { // Проверка типа файла
+            //                return new JsonResponse(['error' => sprintf('File %s has an invalid file type.', $file->getClientOriginalName())], 400);
+            //            }
 
             $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-            $newFilename = $playlistId . '-' . $originalFilename . '.' . $file->guessExtension();
+            $newFilename      = $playlistId . '-' . $originalFilename . '.' . $file->guessExtension();
 
             try {
-                $file->move(
-                    $playlistDirectory, // Путь для сохранения файлов
-                    $newFilename
-                );
+                $file->move($playlistDirectory, // Путь для сохранения файлов
+                    $newFilename);
 
                 $uploadedFiles[] = $newFilename;
             } catch (FileException) {

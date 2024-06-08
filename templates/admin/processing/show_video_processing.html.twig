@@ -1,0 +1,43 @@
+{#{% extends '@EasyAdmin/layout.html.twig' %}#}
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block field %}
+{% endblock %}
+
+
+{% block content %}
+    <div class="content-panel">
+        <h1>{{ page_title }}</h1>
+        <br>
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped table-hover">
+                <thead>
+                <tr>
+                    <th>Видео ID</th>
+                    <th>Статус</th>
+                    <th>Название видео</th>
+                    <th>Плейлист</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for video in videos %}
+{#                    <span style="#}
+{#                                border-radius: 3em;#}
+{#                                color: #2c5a3d;#}
+{#                                font-weight: 500;#}
+{#                                background-color: #98daaf;#}
+{#                                padding: 1px 7px;#}
+{#                            ">{{ 'Завершено' }}</span>#}
+                    <tr>
+                        <td>{{ video.video }}</td>
+                        <td>{{ video.processing }}</td>
+                        <td>{{ video.name }}</td>
+                        <td>{{ video.playlist }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}
+

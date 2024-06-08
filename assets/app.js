@@ -5,6 +5,10 @@ import './bootstrap.js';
  * This file will be included onto the page via the importmap() Twig function,
  * which should already be in your base.html.twig.
  */
+import './styles/normalize.css';
 import './styles/app.css';
+import './styles/glide.core.min.css';
+import './styles/glide.theme.min.css';
 
-console.log('This log comes from assets/app.js - welcome to AssetMapper! 🎉');
+// import  './js/glide.js'
+import  './js/custom.js'

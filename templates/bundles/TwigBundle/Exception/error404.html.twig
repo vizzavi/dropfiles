@@ -1,0 +1,30 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Page not found{% endblock %}
+
+{% block body %}
+    <section class="air-404">
+
+        <div class="air-404__left">
+            <img src="{{ asset('img/404.png') }}" class="air-404__img" alt="404">
+        </div>
+        <div class="air-404__right">
+            <h1 class="air-404__title">
+                Файлы по этой ссылке не найден
+            </h1>
+            <p class="air-404__subtitle">Возможные причины:</p>
+            <ul class="air-404__ul">
+                <li class="air-404__li">Срок хранения закончился</li>
+                <li class="air-404__li">Владелец удалил файлы</li>
+                <li class="air-404__li">Вы посещаете неправильную ссылку</li>
+            </ul>
+        </div>
+    </section>
+
+    <footer class="air-section air-section__no-padding">
+        <p class="air-section__description air-section__no-margin">
+            FILES.DAVINCI.PM - бесплатный сервис мгновенного обмена видео.
+            Без регистрации, скорость загрузки и скачивания не ограничена.
+        </p>
+    </footer>
+{% endblock %}

@@ -40,8 +40,7 @@ class DashboardController extends AbstractDashboardController
 
     public function configureDashboard(): Dashboard
     {
-        return Dashboard::new()->setTitle('Dropfiles')
-        ;
+        return Dashboard::new()->setTitle('Dropfiles');
     }
 
     public function configureMenuItems(): iterable
@@ -50,8 +49,11 @@ class DashboardController extends AbstractDashboardController
             MenuItem::linkToDashboard('Dashboard', 'fa fa-home'),
 
             MenuItem::section('Video hosting'),
-            MenuItem::linkToCrud('Playlist', 'fa fa-list', Playlist::class),
-            MenuItem::linkToCrud('Videos', 'fa fa-video-camera', Video::class),
+            MenuItem::linkToCrud('Плейлисты', 'fa fa-list', Playlist::class),
+            MenuItem::linkToCrud('Видео', 'fa fa-video-camera', Video::class),
+
+            MenuItem::linkToRoute('Процессинг видео', 'fas fa-hourglass-half', 'show_video_processing'),
+
         ];
     }
 

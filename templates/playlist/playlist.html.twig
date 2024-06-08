@@ -1,0 +1,98 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello PlaylistController!{% endblock %}
+
+{% block body %}
+
+{#    {{ dump(playlist.createdAt | date('Y-m-d')) }}#}
+
+    <section class="air-bread">
+        <div class="air-bread__left">Trailer_volk_s_w-s.mp4 и ещё 2 видео</div>
+        <div class="air-bread__right">
+
+            <button title="Удалить" class="air-bread__item air-bread__desc air-bread__delete">
+                <img src="{{ asset('img/delete.png') }}" alt="" class="air-bread__ic">
+                <span>Удалить</span>
+            </button>
+
+            <button title="Поделиться" class="air-bread__item air-bread__share">
+                <img src="{{ asset('img/share.png') }}" alt="" class="air-bread__ic">
+                <span>Поделиться</span>
+            </button>
+
+            <button title="Скачать все" class="air-bread__item air-bread__download">
+                <img src="{{ asset('img/download-green.png') }}" alt="" class="air-bread__ic">
+                <span>Скачать все</span>
+            </button>
+
+            <button title="Информация" class="air-bread__item air-bread__mob air-bread__info">
+                <span>Информация</span>
+            </button>
+        </div>
+    </section>
+
+
+
+    <section class="air-section air-section__archive">
+
+        <div class="air-section__block">
+            <div class="air-section__size">
+                {{ playlist.createdAt | date('Y-m-d') }} | 3 файла {{ playlist.videos.count }} | 75 MB | 1 просмотров страницы
+            </div>
+
+            <div class="air-section__red">
+                Будет удалено {{ playlist.createdAt | date('Y-m-d H:i:s') }}
+            </div>
+
+        </div>
+
+        <div class="air-section__files air-section__archive-block">
+
+            {# TODO: Вывод видео #}
+            {{ dump(playlist.videos.0) }}
+
+            <div class="air-files__item">
+                <button class="air-item__icon" title="скачать файл">
+                    <img src="{{ asset('img/download-icon.png') }}" alt="">
+                </button>
+                <a href="#" class="air-files__link">
+                    <img src="{{ asset('img/play.png') }}" alt="" class="air-item__img-play">
+                    <img src="{{ asset('img/item-1.png') }}" alt="" class="air-item__image">
+                    <h3 class="air-item__title">Trailer_volk_s_w-s.mp4</h3>
+                </a>
+            </div>
+
+            <div class="air-files__item">
+                <button class="air-item__icon" title="скачать файл">
+                    <img src="{{ asset('img/download-icon.png') }}" alt="">
+                </button>
+                <a href="#" class="air-files__link">
+                    <img src="{{ asset('img/play.png') }}" alt="" class="air-item__img-play">
+                    <img src="{{ asset('img/item-2.png') }}" alt="" class="air-item__image">
+                    <h3 class="air-item__title">davincimovie.mp4</h3>
+                </a>
+            </div>
+
+            <div class="air-files__item">
+                <button class="air-item__icon" title="скачать файл">
+                    <img src="{{ asset('img/download-icon.png') }}" alt="">
+                </button>
+                <a href="#" class="air-files__link">
+                    <img src="{{ asset('img/play.png') }}" alt="" class="air-item__img-play">
+                    <img src="{{ asset('img/item-3.png') }}" alt="" class="air-item__image">
+                    <h3 class="air-item__title">dvmovie2.mp4</h3>
+                </a>
+            </div>
+
+        </div>
+
+    </section>
+
+    <footer class="air-section air-section__no-padding">
+        <p class="air-section__description air-section__no-margin">
+            FILES.DAVINCI.PM - бесплатный сервис мгновенного обмена видео.
+            Без регистрации, скорость загрузки и скачивания не ограничена.
+        </p>
+    </footer>
+
+{% endblock %}
