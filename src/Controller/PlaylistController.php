@@ -5,9 +5,11 @@ namespace App\Controller;
 use App\Entity\Playlist;
 use App\Entity\Video;
 use App\Enum\FileLifeTime;
+use App\Enum\ProcessingStatus;
 use App\Form\PlaylistType;
 use App\Message\Video\VideoProcessingMessege;
 use App\Repository\PlaylistRepository;
+use App\Service\MercureService;
 use App\Service\PlaylistService;
 use App\ValueObject\FileSize;
 use DateTimeImmutable;
@@ -15,12 +17,12 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Uid\Uuid;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
 class PlaylistController extends AbstractController
 {
@@ -28,6 +30,7 @@ class PlaylistController extends AbstractController
         private readonly PlaylistService $playlistService,
         private readonly EntityManagerInterface $entityManager,
         private readonly PlaylistRepository $playlistRepository,
+        private readonly MercureService $mercureService,
     ) {
     }
 
@@ -35,7 +38,6 @@ class PlaylistController extends AbstractController
     public function index(Request $request, MessageBusInterface $bus): Response
     {
         $playlistId = $this->playlistService->generatePlaylistId($request->getSession());
-//        echo "<h1>Playlist: $playlistId</h1>";
 
         $form = $this->createForm(PlaylistType::class, null, [
             'playlistId' => $playlistId,
@@ -62,10 +64,9 @@ class PlaylistController extends AbstractController
                         ->setUuid($playlistUuid)
                         ->setCreatedAt(new DateTimeImmutable())
                         ->setDeletionData($deletionDate)
-                        ->setPageViewed(0)
-                        ->setDeleteFlag(false)
                     ;
                     $this->entityManager->persist($playlist);
+                    $this->entityManager->flush();
                 }
 
                 foreach ($uploadedFiles as $uploadedFile) {
@@ -85,19 +86,18 @@ class PlaylistController extends AbstractController
                             ->setName($newFilename)
                             ->setUuid($videoID)
                             ->setDeletionDate($deletionDate)
-                            ->setViews(0)
-                            ->setDeleteFlag(false)
                             ->setSize($uploadedFileSizeInKB)
-                            ->setDownloads(0)
                             ->setImagePreview(null)
                             ->setPath($destination . '/' . $videoID . '/input', $newFilename)
+                            ->setProcessingStatus(ProcessingStatus::queue->value)
                         ;
 
                         $this->entityManager->persist($video);
+                        $this->entityManager->flush();
 
                         $videoMessage = new VideoProcessingMessege(
                             $videoID,
-                            $playlistId,
+                            $playlist->getUuid(),
                             $destination . '/' . $videoID . '/input/' . $newFilename,
                             $destination . '/' . $videoID, $newFilename, $storageDuration
                         );
@@ -105,10 +105,9 @@ class PlaylistController extends AbstractController
                     } catch (FileException $e) {
                         $this->addFlash('error', 'Failed to upload file.');
                         dd('Error: ' . $e->getMessage());
+                    } catch (TransportExceptionInterface $e) {
                     }
                 }
-
-                $this->entityManager->flush();
             }
 
             return $this->redirectToRoute('app_upload_success');

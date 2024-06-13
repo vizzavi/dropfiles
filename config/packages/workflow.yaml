@@ -1,0 +1,18 @@
+framework:
+    workflows:
+        video_processing:
+            type: 'state_machine'
+            initial_marking: 'queued'
+            supports:
+                - App\Entity\Video
+            places:
+                - queued
+                - processing
+                - completed
+            transitions:
+                start_processing:
+                    from: queued
+                    to: processing
+                complete:
+                    from: processing
+                    to: completed

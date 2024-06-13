@@ -40,6 +40,9 @@ logs-%:
 messenger:
 	 bin/console messenger:consume async -vv
 
+generage-mercure-jwt-secret:
+	openssl rand -base64 32
+
 #------------------------------------------------
 
 asset-compile-for-prod:

@@ -1,0 +1,20 @@
+{
+    debug
+}
+
+:80
+
+route {
+    encode gzip
+
+    mercure {
+        transport_url bolt:///data/mercure.db
+        publisher_jwt LINRekkIBuBH8BK0OcXuNDazar5LvSOh5gHBTLyr6wU=
+        subscriber_jwt KWzEJmSAD7G8w06gG2jqbH2TVfBR3JRKeguAMl8eBLw=
+        anonymous
+        demo
+        cors_origins http://localhost:8080
+    }
+
+    respond /healthz 200
+}

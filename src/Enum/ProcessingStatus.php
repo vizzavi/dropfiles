@@ -2,16 +2,16 @@
 
 namespace App\Enum;
 
-enum StatusVideoInProcessing: string
+enum ProcessingStatus: string
 {
-    case inQueue = 'in queue';
+    case queue = 'queued';
     case processing = 'processing';
     case done = 'done';
 
-
-    public function getLable(): string {
-        return match($this) {
-            self::inQueue    => strtoupper(self::inQueue->value),
+    public function getLable(): string
+    {
+        return match ($this) {
+            self::queue      => strtoupper(self::queue->value),
             self::processing => strtoupper(self::processing->value),
             self::done       => strtoupper(self::done->value),
         };
@@ -20,25 +20,18 @@ enum StatusVideoInProcessing: string
     public function getColor(): string|array|null
     {
         return match ($this) {
-            self::inQueue    => 'gray',
+            self::queue      => 'gray',
             self::processing => 'orange',
             self::done       => 'success',
         };
-	}
+    }
 
     public function getIcon(): ?string
     {
         return match ($this) {
-            self::inQueue    => 'fas fa-envelope',
+            self::queue      => 'fas fa-envelope',
             self::processing => 'fas fa-hourglass-half',
             self::done       => 'fas fa-check',
         };
-	}
+    }
 }
-
-
-
-//            fas fa-envelope
-//            fas fa-hourglass-half
-//            fas fa-check
-//            MenuItem::linkToCrud('Процессинг видео', 'fas fa-hourglass-half', Video::class),

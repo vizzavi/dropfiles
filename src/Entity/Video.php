@@ -18,13 +18,13 @@ class Video
     #[ORM\Column(nullable: true)]
     private ?DateTimeImmutable $deletionDate = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'integer', nullable: true, options: ["default" => 0])]
     private ?int $views = null;
 
     #[ORM\Column(options:["comment"=>"Размер файла в килобайтах"]) ]
     private ?int $size = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'integer', nullable: true, options: ["default" => 0])]
     private ?int $downloads = null;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -39,8 +39,11 @@ class Video
     #[ORM\Column]
     private ?DateTimeImmutable $createdAt = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'boolean', nullable: true, options: ['default' => false])]
     private ?bool $deleteFlag = null;
+
+    #[ORM\Column(type: 'string', length: 255)]
+    private ?string $processingStatus = null;
 
     #[ORM\ManyToOne(inversedBy: 'videos')]
     #[ORM\JoinColumn(name: "playlist_uuid", referencedColumnName: "uuid", nullable: false)]
@@ -176,5 +179,28 @@ class Video
         $this->playlist = $playlist;
 
         return $this;
+    }
+
+    public function getProcessingStatus(): ?string
+    {
+        return $this->processingStatus;
+    }
+
+    public function setProcessingStatus(?string $processingStatus): static
+    {
+        $this->processingStatus = $processingStatus;
+
+        return $this;
+    }
+
+    // Методы для совместимости с Symfony Workflow
+    public function getMarking(): ?string
+    {
+        return $this->getProcessingStatus();
+    }
+
+    public function setMarking(?string $marking): self
+    {
+        return $this->setProcessingStatus($marking);
     }
 }

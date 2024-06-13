@@ -23,10 +23,10 @@ class Playlist
     #[ORM\Column(nullable: true)]
     private ?DateTimeImmutable $deletionData = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'integer', nullable: true, options: ["default" => 0])]
     private ?int $pageViewed = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'boolean', nullable: true, options: ['default' => false])]
     private ?bool $deleteFlag = null;
 
     /**

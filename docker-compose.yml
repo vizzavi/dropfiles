@@ -31,6 +31,9 @@ services:
             - './docker/php-fpm/php-ini-overrides.ini:/etc/php/8.3/fpm/conf.d/99-overrides.ini'
         environment:
             PHP_IDE_CONFIG: "serverName=dropfiles"
+            REDIS_URL: ${REDIS_URL}
+        depends_on:
+            - redis
 
     rabbitmq:
         image: rabbitmq:3.13.3-management
@@ -40,6 +43,35 @@ services:
 
     redis:
         image: 'redis:alpine'
+        ports:
+            - "6379:6379"
+        environment:
+            REDIS_PASSWORD: ${REDIS_PASSWORD}
+        command: redis-server --requirepass ${REDIS_PASSWORD}
+
+    mercure:
+      image: dunglas/mercure
+      restart: unless-stopped
+      environment:
+        # Uncomment the following line to disable HTTPS,
+        #SERVER_NAME: ':80'
+        MERCURE_PUBLISHER_JWT_KEY: ${MERCURE_PUBLISHER_JWT_KEY}
+        MERCURE_SUBSCRIBER_JWT_KEY: ${MERCURE_SUBSCRIBER_JWT_KEY}
+        # Set the URL of your Symfony project (without trailing slash!) as value of the cors_origins directive
+        MERCURE_EXTRA_DIRECTIVES: |
+          cors_origins http://localhost:8080
+      # Comment the following line to disable the development mode
+      command: /usr/bin/caddy run --adapter caddyfile --config /etc/caddy/Caddyfile.dev
+      healthcheck:
+        test: ["CMD", "curl", "-f", "https://localhost/healthz"]
+        timeout: 5s
+        retries: 5
+      ports:
+        - '3001:80'
+      volumes:
+        - mercure_data:/data
+        - ./docker/mercure/Caddyfile.dev:/etc/caddy/Caddyfile.dev
 
 volumes:
     database_data:
+    mercure_data:
