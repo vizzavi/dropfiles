@@ -24,3 +24,5 @@ http://localhost:8080/admin?token=9730c71e-7f7e-4b03-8bda-47f83fe78fce
 - В очереди
 - В обработке
 - Завершено
+
+[Список мини тасок](TODO.md)
