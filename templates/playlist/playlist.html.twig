@@ -6,14 +6,22 @@
 
 {#    {{ dump(playlist.createdAt | date('Y-m-d')) }}#}
 
+{#    {{ stimulus_controller('playlist') }}#}
     <section class="air-bread">
         <div class="air-bread__left">Trailer_volk_s_w-s.mp4 и ещё 2 видео</div>
         <div class="air-bread__right">
 
-            <button title="Удалить" class="air-bread__item air-bread__desc air-bread__delete">
-                <img src="{{ asset('img/delete.png') }}" alt="" class="air-bread__ic">
-                <span>Удалить</span>
-            </button>
+            {% if isPlaylistOwner %}
+                <button title="Удалить"
+                        class="air-bread__item air-bread__desc air-bread__delete"
+                        data-controller="playlist"
+                        data-action="click->playlist#deletePlaylist"
+                        data-url="{{ path('api_playlist_delete', { playlistId: playlistId }) }}"
+                >
+                    <img src="{{ asset('img/delete.png') }}" alt="" class="air-bread__ic">
+                    <span>Удалить</span>
+                </button>
+            {% endif %}
 
             <button title="Поделиться" class="air-bread__item air-bread__share">
                 <img src="{{ asset('img/share.png') }}" alt="" class="air-bread__ic">

@@ -4,6 +4,22 @@
 {% block field %}
 {% endblock %}
 
+{#{% block javascripts %}#}
+{#    {{ parent() }}#}
+{#    <script src="https://unpkg.com/@hotwired/turbo"></script>#}
+{#    <script>#}
+{#        const eventSource = new EventSource('{{ mercure_url }}?topic=video_status_channel');#}
+
+{#        eventSource.onmessage = function(event) {#}
+{#            const data = JSON.parse(event.data);#}
+{#            const videoElement = document.querySelector(`#video-${data.id}`);#}
+
+{#            if (videoElement) {#}
+{#                videoElement.querySelector('.status').textContent = data.status;#}
+{#            }#}
+{#        };#}
+{#    </script>#}
+{#{% endblock %}#}
 
 {% block content %}
     <div class="content-panel">

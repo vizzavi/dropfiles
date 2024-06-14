@@ -14,7 +14,9 @@ use App\Service\PlaylistService;
 use App\ValueObject\FileSize;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -31,6 +33,7 @@ class PlaylistController extends AbstractController
         private readonly EntityManagerInterface $entityManager,
         private readonly PlaylistRepository $playlistRepository,
         private readonly MercureService $mercureService,
+        private readonly Filesystem $filesystem,
     ) {
     }
 
@@ -64,6 +67,8 @@ class PlaylistController extends AbstractController
                         ->setUuid($playlistUuid)
                         ->setCreatedAt(new DateTimeImmutable())
                         ->setDeletionData($deletionDate)
+                        ->setPageViewed(0)
+                        ->setDeleteFlag(false)
                     ;
                     $this->entityManager->persist($playlist);
                     $this->entityManager->flush();
@@ -99,7 +104,8 @@ class PlaylistController extends AbstractController
                             $videoID,
                             $playlist->getUuid(),
                             $destination . '/' . $videoID . '/input/' . $newFilename,
-                            $destination . '/' . $videoID, $newFilename, $storageDuration
+                            $destination . '/' . $videoID, $newFilename,
+                            $storageDuration
                         );
                         $bus->dispatch($videoMessage);
                     } catch (FileException $e) {
@@ -115,6 +121,7 @@ class PlaylistController extends AbstractController
 
         return $this->render('playlist/index.html.twig', [
             'link_for_downloading' => 'https://files.davinci.pm/' . $playlistId,
+            'playlistId' => $playlistId,
             'form' => $form->createView(),
         ]);
     }
@@ -128,6 +135,8 @@ class PlaylistController extends AbstractController
             throw $this->createNotFoundException('The playlist does not exist');
         }
 
+        $isPlaylistOwner = $this->playlistService->isPlaylistOwner($request->getSession());
+
         $videos = $playlist->getVideos();
 
 //        dd($playlist->getDeletionData());
@@ -138,8 +147,41 @@ class PlaylistController extends AbstractController
         // Show playlist
 
         return $this->render('playlist/playlist.html.twig', [
+            'isPlaylistOwner' => $isPlaylistOwner,
             'playlist' => $playlist,
+            'playlistId' => $playlistId,
         ]);
+    }
+
+    /**
+     * @throws Exception
+     */
+    #[Route('/api/playlist/{playlistId}', name: 'api_playlist_delete', methods: ['DELETE'])]
+    public function delete(Request $request, string $playlistId): Response
+    {
+        $playlist = $this->playlistRepository->findOneBy(['uuid' => $playlistId]);
+
+        if (! $playlist) {
+            return new JsonResponse(['status' => 'Плейлист не найден'], Response::HTTP_NOT_FOUND);
+        }
+
+        try {
+            $this->playlistRepository->deletePlaylistWithVideos($playlist);
+
+            # TODO: вынести в константу
+            $folderPath = $this->getParameter('kernel.project_dir') . '/uploads/private/' . $playlist->getUuid();
+
+            if ($this->filesystem->exists($folderPath)) {
+                $this->filesystem->remove($folderPath);
+            }
+
+            //        $this->addFlash('success', 'Playlist has been deleted.');
+        } catch (Exception) {
+             return new JsonResponse(['status' => 'Ошибка удаления плейлиста'], 400);
+        }
+
+
+        return new JsonResponse(['status' => 'Плейлист удален'], 200);
     }
 
     #[Route('/playlist/upload-success', name: 'app_upload_success', methods: ['GET'])]

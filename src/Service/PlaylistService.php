@@ -18,4 +18,13 @@ class PlaylistService
 
         return $playlistId;
     }
+
+    public function isPlaylistOwner(SessionInterface $session): bool
+    {
+        if ($session->has('playlistId')) {
+            return $session->get('playlistId');
+        }
+
+        return false;
+    }
 }

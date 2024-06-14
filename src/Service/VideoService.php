@@ -26,8 +26,8 @@ readonly class VideoService
     {
         $video = $this->ffmpeg->open($inputPath);
 
-        $this->convertVideo($video, $outputPath);
         $this->createVideoPoster($video, $outputPath);
+        $this->convertVideo($video, $outputPath);
     }
 
     public function convertVideo(Video $video, string $outputPath): void
@@ -37,14 +37,14 @@ readonly class VideoService
         $format->setKiloBitrate(800); // Установка битрейта
         $format->setAudioCodec('aac'); // Установка аудио кодека
         $format->setAdditionalParameters([
-            '-vf', 'scale=1280:-2',    // Изменение разрешения до 720p
-            '-r', '30',                // Фиксированный фреймрейт 30 fps
-            '-preset', 'veryfast',     // Пресет сжатия
-            '-movflags', '+faststart', // Оптимизация для прогрессивной загрузки
-            '-crf', '29',              // Контрольный параметр качества (снизить значение для лучшего качества, повысить для меньшего размера)
-            '-maxrate', '800k',        // Максимальный битрейт
-            '-bufsize', '1600k',       // Размер буфера
-            '-pix_fmt', 'yuv420p',     // Формат пикселей
+            '-vf', 'scale=1280:-2',      // Изменение разрешения до 720p
+            '-r', '30',                  // Фиксированный фреймрейт 30 fps
+            '-preset', 'fast',           // Пресет сжатия
+            '-movflags', '+faststart',   // Оптимизация для прогрессивной загрузки
+//            '-crf', '29',              // Контрольный параметр качества (снизить значение для лучшего качества, повысить для меньшего размера)
+//            '-maxrate', '800k',        // Максимальный битрейт
+//            '-bufsize', '1600k',       // Размер буфера
+//            '-pix_fmt', 'yuv420p',     // Формат пикселей
         ]);
 
         $video->save($format, $outputPath . '/video.mp4');
