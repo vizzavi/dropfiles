@@ -35,6 +35,15 @@ class PlaylistRepository extends ServiceEntityRepository
         }
     }
 
+    public function updatePageViewed(Playlist $playlist): void
+    {
+        $pageViewed = $playlist->getPageViewed() ?? 0;
+        $playlist->setPageViewed($pageViewed + 1);
+
+        $this->entityManager->persist($playlist);
+        $this->entityManager->flush();
+    }
+
     //    /**
     //     * @return Playlist[] Returns an array of Playlist objects
     //     */

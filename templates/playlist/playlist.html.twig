@@ -45,7 +45,7 @@
 
         <div class="air-section__block">
             <div class="air-section__size">
-                {{ playlist.createdAt | date('Y-m-d') }} | 3 файла {{ playlist.videos.count }} | 75 MB | 1 просмотров страницы
+                {{ playlist.createdAt | date('Y-m-d') }} | 3 файла {{ playlist.videos.count }} | 75 MB | {{ playlist.pageViewed }} просмотров страницы
             </div>
 
             <div class="air-section__red">

@@ -17,6 +17,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -135,6 +136,14 @@ class PlaylistController extends AbstractController
             throw $this->createNotFoundException('The playlist does not exist');
         }
 
+        $response = new Response();
+        if (! $request->cookies->get('playlist_visited')) {
+            $cookie = new Cookie('playlist_visited', true, new DateTimeImmutable('+1 hour'));
+            $response->headers->setCookie($cookie);
+
+            $this->playlistRepository->updatePageViewed($playlist);
+        }
+
         $isPlaylistOwner = $this->playlistService->isPlaylistOwner($request->getSession());
 
         $videos = $playlist->getVideos();
@@ -150,7 +159,7 @@ class PlaylistController extends AbstractController
             'isPlaylistOwner' => $isPlaylistOwner,
             'playlist' => $playlist,
             'playlistId' => $playlistId,
-        ]);
+        ], $response);
     }
 
     /**

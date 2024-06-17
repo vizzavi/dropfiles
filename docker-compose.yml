@@ -32,8 +32,8 @@ services:
         environment:
             PHP_IDE_CONFIG: "serverName=dropfiles"
             REDIS_URL: ${REDIS_URL}
-        depends_on:
-            - redis
+#        depends_on:
+#            - redis
 
     rabbitmq:
         image: rabbitmq:3.13.3-management
@@ -41,13 +41,13 @@ services:
             - '5672:5672'
             - '15672:15672'
 
-    redis:
-        image: 'redis:alpine'
-        ports:
-            - "6379:6379"
-        environment:
-            REDIS_PASSWORD: ${REDIS_PASSWORD}
-        command: redis-server --requirepass ${REDIS_PASSWORD}
+#    redis:
+#        image: 'redis:alpine'
+#        ports:
+#            - "6379:6379"
+#        environment:
+#            REDIS_PASSWORD: ${REDIS_PASSWORD}
+#        command: redis-server --requirepass ${REDIS_PASSWORD}
 
     mercure:
       image: dunglas/mercure
