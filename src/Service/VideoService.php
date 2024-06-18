@@ -2,6 +2,8 @@
 
 namespace App\Service;
 
+use App\Message\Video\VideoProcessingMessege;
+use App\Repository\VideoRepository;
 use FFMpeg\Coordinate\TimeCode;
 use FFMpeg\FFMpeg;
 use FFMpeg\Format\Video\X264;
@@ -18,15 +20,17 @@ readonly class VideoService
     private const int POSTER_COMPRESSION_QUALITY = 85;
 
 
-    public function __construct(private FFMpeg $ffmpeg)
+    public function __construct(private FFMpeg $ffmpeg, private VideoRepository $videoRepository)
     {
     }
 
-    public function processVideo(string $inputPath, string $outputPath): void
+    public function processVideo(VideoProcessingMessege $messege): void
     {
-        $video = $this->ffmpeg->open($inputPath);
+        $video = $this->ffmpeg->open($messege->videoInputPath);
 
-        $this->createVideoPoster($video, $outputPath);
+        $this->createVideoPoster($video, $messege->videoOutputPath);
+
+        $outputPath = sprintf('%s/%s.mp4', $messege->videoOutputPath, $messege->videoName);
         $this->convertVideo($video, $outputPath);
     }
 
@@ -47,7 +51,7 @@ readonly class VideoService
 //            '-pix_fmt', 'yuv420p',     // Формат пикселей
         ]);
 
-        $video->save($format, $outputPath . '/video.mp4');
+        $video->save($format, $outputPath);
     }
 
     public function createVideoPoster(Video $video, string $outputPath): void

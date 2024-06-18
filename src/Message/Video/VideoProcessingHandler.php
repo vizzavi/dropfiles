@@ -5,6 +5,7 @@ namespace App\Message\Video;
 use App\Entity\Video;
 use App\Service\VideoService;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Workflow\Registry;
 
@@ -14,15 +15,13 @@ readonly class VideoProcessingHandler
     public function __construct(
         private VideoService $videoService,
         private Registry $workflowRegistry,
-        private EntityManagerInterface $entityManager
+        private EntityManagerInterface $entityManager,
+        private Filesystem $filesystem
     ) {
     }
 
     public function __invoke(VideoProcessingMessege $message): void
     {
-        $input = $message->videoInputPath;
-        $output = $message->videoOutputPath;
-
         $video = $this->entityManager
             ->getRepository(Video::class)
             ->findOneBy([
@@ -40,11 +39,12 @@ readonly class VideoProcessingHandler
         // Сохранение сущности Video после изменения состояния
         $this->entityManager->flush();
 
-        $this->videoService->processVideo($input, $output);
-
-        # TODO: Очистка загруженного видео
+        $this->videoService->processVideo($message);
 
         $workflow->apply($video, 'complete');
         $this->entityManager->flush();
+
+        $directoryPath = dirname($message->videoInputPath);
+        $this->filesystem->remove($directoryPath);
     }
 }

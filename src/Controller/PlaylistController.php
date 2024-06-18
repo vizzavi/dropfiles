@@ -58,7 +58,6 @@ class PlaylistController extends AbstractController
                 $destination = $this->getParameter('kernel.project_dir') . '/uploads/private/' . $playlistId;
 
                 $deletionDate = FileLifeTime::from($storageDuration)->getDate();
-
                 $playlistUuid = Uuid::fromString($playlistId);
 
                 $playlist = $this->entityManager->getRepository(Playlist::class)->findOneBy(['uuid' => $playlistUuid]);
@@ -76,9 +75,9 @@ class PlaylistController extends AbstractController
                 }
 
                 foreach ($uploadedFiles as $uploadedFile) {
-                    $videoID          = Uuid::v4();
-                    $originalFilename = pathinfo($uploadedFile->getClientOriginalName(), PATHINFO_FILENAME);
-                    $newFilename      = $originalFilename . '.' . $uploadedFile->guessExtension();
+                    $videoID  = Uuid::v4();
+                    $fileName = pathinfo($uploadedFile->getClientOriginalName(), PATHINFO_FILENAME);
+                    $newFilename = $fileName . '.' . $uploadedFile->guessExtension();
 
                     try {
                         $uploadedFile->move($destination . '/' . $videoID . '/input', $newFilename);
@@ -89,12 +88,12 @@ class PlaylistController extends AbstractController
                         $video = (new Video())
                             ->setPlaylist($playlist)
                             ->setCreatedAt(new DateTimeImmutable())
-                            ->setName($newFilename)
+                            ->setName($fileName)
                             ->setUuid($videoID)
                             ->setDeletionDate($deletionDate)
                             ->setSize($uploadedFileSizeInKB)
                             ->setImagePreview(null)
-                            ->setPath($destination . '/' . $videoID . '/input', $newFilename)
+                            ->setPath($destination . '/' . $videoID)
                             ->setProcessingStatus(ProcessingStatus::queue->value)
                         ;
 
@@ -105,8 +104,9 @@ class PlaylistController extends AbstractController
                             $videoID,
                             $playlist->getUuid(),
                             $destination . '/' . $videoID . '/input/' . $newFilename,
-                            $destination . '/' . $videoID, $newFilename,
-                            $storageDuration
+                            $destination . '/' . $videoID,
+                            $fileName,
+                            $storageDuration,
                         );
                         $bus->dispatch($videoMessage);
                     } catch (FileException $e) {
@@ -138,7 +138,7 @@ class PlaylistController extends AbstractController
 
         $response = new Response();
         if (! $request->cookies->get('playlist_visited')) {
-            $cookie = new Cookie('playlist_visited', true, new DateTimeImmutable('+1 hour'));
+            $cookie = new Cookie('playlist_visited', true, new DateTimeImmutable('+1 hour'), partitioned: true);
             $response->headers->setCookie($cookie);
 
             $this->playlistRepository->updatePageViewed($playlist);
