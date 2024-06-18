@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Message\Video\VideoProcessingMessege;
 use App\Repository\VideoRepository;
+use App\ValueObject\FileSize;
 use FFMpeg\Coordinate\TimeCode;
 use FFMpeg\FFMpeg;
 use FFMpeg\Format\Video\X264;
@@ -24,7 +25,7 @@ readonly class VideoService
     {
     }
 
-    public function processVideo(VideoProcessingMessege $messege): void
+    public function processVideo(VideoProcessingMessege $messege): FileSize
     {
         $video = $this->ffmpeg->open($messege->videoInputPath);
 
@@ -32,6 +33,8 @@ readonly class VideoService
 
         $outputPath = sprintf('%s/%s.mp4', $messege->videoOutputPath, $messege->videoName);
         $this->convertVideo($video, $outputPath);
+
+        return new FileSize(filesize($outputPath), FileSize::UNIT_BYTE);
     }
 
     public function convertVideo(Video $video, string $outputPath): void

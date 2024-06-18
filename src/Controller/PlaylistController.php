@@ -138,7 +138,7 @@ class PlaylistController extends AbstractController
 
         $response = new Response();
         if (! $request->cookies->get('playlist_visited')) {
-            $cookie = new Cookie('playlist_visited', true, new DateTimeImmutable('+1 hour'), partitioned: true);
+            $cookie = new Cookie('playlist_visited', true, new DateTimeImmutable('+1 hour'));
             $response->headers->setCookie($cookie);
 
             $this->playlistRepository->updatePageViewed($playlist);
@@ -155,10 +155,15 @@ class PlaylistController extends AbstractController
 
         // Show playlist
 
+        $playlistTitle = $this->playlistService->generatePlaylistTitle($videos);
+
+        $allVideosSize = $this->playlistService->getVideosSize($videos);
+
         return $this->render('playlist/playlist.html.twig', [
             'isPlaylistOwner' => $isPlaylistOwner,
             'playlist' => $playlist,
-            'playlistId' => $playlistId,
+            'playlistTitle' => $playlistTitle,
+            'allVideosSize' => $allVideosSize,
         ], $response);
     }
 

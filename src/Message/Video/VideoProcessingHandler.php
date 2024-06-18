@@ -4,6 +4,7 @@ namespace App\Message\Video;
 
 use App\Entity\Video;
 use App\Service\VideoService;
+use App\ValueObject\FileSize;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
@@ -39,9 +40,12 @@ readonly class VideoProcessingHandler
         // Сохранение сущности Video после изменения состояния
         $this->entityManager->flush();
 
-        $this->videoService->processVideo($message);
+        $outputFileSize = $this->videoService->processVideo($message);
 
         $workflow->apply($video, 'complete');
+        $video->setSize($outputFileSize->convertTo(FileSize::UNIT_KILOBYTE));
+
+        $this->entityManager->persist($video);
         $this->entityManager->flush();
 
         $directoryPath = dirname($message->videoInputPath);

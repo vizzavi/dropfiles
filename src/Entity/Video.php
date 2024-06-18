@@ -90,9 +90,9 @@ class Video
         return $this->size;
     }
 
-    public function setSize(int $sizeInBytes): self
+    public function setSize(int $sizeInKiloBytes): self
     {
-        $this->size = $sizeInBytes;
+        $this->size = $sizeInKiloBytes;
 
         return $this;
     }

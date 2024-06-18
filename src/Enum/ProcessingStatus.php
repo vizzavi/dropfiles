@@ -8,6 +8,9 @@ enum ProcessingStatus: string
     case processing = 'processing';
     case done = 'done';
 
+    case transitionStartProcessing = 'start_processing';
+    case transitionComplete = 'complete';
+
     public function getLable(): string
     {
         return match ($this) {
