@@ -9,23 +9,28 @@ use App\Enum\ProcessingStatus;
 use App\Form\PlaylistType;
 use App\Message\Video\VideoProcessingMessege;
 use App\Repository\PlaylistRepository;
+use App\Repository\VideoRepository;
 use App\Service\MercureService;
 use App\Service\PlaylistService;
 use App\ValueObject\FileSize;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
+use ZipArchive;
 
 class PlaylistController extends AbstractController
 {
@@ -33,6 +38,7 @@ class PlaylistController extends AbstractController
         private readonly PlaylistService $playlistService,
         private readonly EntityManagerInterface $entityManager,
         private readonly PlaylistRepository $playlistRepository,
+        private readonly VideoRepository $videoRepository,
         private readonly MercureService $mercureService,
         private readonly Filesystem $filesystem,
     ) {
@@ -147,16 +153,7 @@ class PlaylistController extends AbstractController
         $isPlaylistOwner = $this->playlistService->isPlaylistOwner($request->getSession());
 
         $videos = $playlist->getVideos();
-
-//        dd($playlist->getDeletionData());
-
-//        echo 'count - '  . $videos->count();
-//        dd($videos->getValues());
-
-        // Show playlist
-
         $playlistTitle = $this->playlistService->generatePlaylistTitle($videos);
-
         $allVideosSize = $this->playlistService->getVideosSize($videos);
 
         return $this->render('playlist/playlist.html.twig', [
@@ -164,6 +161,7 @@ class PlaylistController extends AbstractController
             'playlist' => $playlist,
             'playlistTitle' => $playlistTitle,
             'allVideosSize' => $allVideosSize,
+            'videos' => $videos
         ], $response);
     }
 
@@ -171,7 +169,7 @@ class PlaylistController extends AbstractController
      * @throws Exception
      */
     #[Route('/api/playlist/{playlistId}', name: 'api_playlist_delete', methods: ['DELETE'])]
-    public function delete(Request $request, string $playlistId): Response
+    public function delete(string $playlistId): Response
     {
         $playlist = $this->playlistRepository->findOneBy(['uuid' => $playlistId]);
 
@@ -196,6 +194,65 @@ class PlaylistController extends AbstractController
 
 
         return new JsonResponse(['status' => 'Плейлист удален'], 200);
+    }
+
+    #[Route('/api/playlist/{playlistId}/download/{videoId?}', name: 'api_playlist_download_videos', methods: ['GET'])]
+    public function downloadPlaylist(string $playlistId, ?string $videoId = null): Response
+    {
+        if ($videoId !== null) {
+            /** @var Video $video */
+            $video = $this->videoRepository->findOneBy(['uuid' => $videoId]);
+
+            $filePath = $video->getPath() . '/' . $video->getName() . '.mp4';
+
+            if (!file_exists($filePath)) {
+                throw $this->createNotFoundException('The file does not exist');
+            }
+
+            return $this->file($filePath);
+        }
+
+        $playlist = $this->playlistRepository->findOneBy(['uuid' => $playlistId]);
+        $countVideos = $playlist?->getVideos()->count();
+
+        if ($countVideos === null && $countVideos > 0) {
+            throw $this->createNotFoundException('The file does not exist');
+        }
+
+        $downloadFileName = 'playlist_' . $playlist->getUuid()?->toRfc4122() . '.zip';
+        $zipFileName = tempnam(sys_get_temp_dir(), $downloadFileName);
+
+        try {
+            $zip = new ZipArchive();
+            if ($zip->open($zipFileName, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
+                throw new RuntimeException('Could not open zip file');
+            }
+
+            foreach ($playlist->getVideos() as $video) {
+                $filePath = $video->getPath() . '/' . $video->getName() . '.mp4';
+
+                if (!$this->filesystem->exists($filePath)) {
+                    throw $this->createNotFoundException('Video file not found: ' . $video->getName());
+                }
+
+                $zip->addFile($filePath, $video->getName() . '.mp4');
+            }
+
+            $zip->close();
+
+            $response = new StreamedResponse(function () use ($zipFileName) {
+                readfile($zipFileName);
+                $this->filesystem->remove($zipFileName);
+            });
+
+            $response->headers->set('Content-Type', 'application/zip');
+            $response->headers->set('Content-Disposition', 'attachment; filename="' . $downloadFileName . '"playlist.zip"');
+            $response->headers->set('Content-Length', filesize($zipFileName));
+
+            return $response;
+        } catch (IOExceptionInterface $exception) {
+            throw new RuntimeException('An error occurred while creating or removing the zip file: ' . $exception->getMessage());
+        }
     }
 
     #[Route('/playlist/upload-success', name: 'app_upload_success', methods: ['GET'])]

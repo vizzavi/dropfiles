@@ -28,18 +28,16 @@
                 <span>Поделиться</span>
             </button>
 
-            <button title="Скачать все" class="air-bread__item air-bread__download">
+            <a href="{{ path('api_playlist_download_videos', { playlistId: playlist.uuid }) }}" title="Скачать все" class="air-bread__item air-bread__download">
                 <img src="{{ asset('img/download-green.png') }}" alt="" class="air-bread__ic">
                 <span>Скачать все</span>
-            </button>
+            </a>
 
             <button title="Информация" class="air-bread__item air-bread__mob air-bread__info">
                 <span>Информация</span>
             </button>
         </div>
     </section>
-
-
 
     <section class="air-section air-section__archive">
 
@@ -55,43 +53,18 @@
         </div>
 
         <div class="air-section__files air-section__archive-block">
-
-            {# TODO: Вывод видео #}
-            {{ dump(playlist.videos.0) }}
-
-            <div class="air-files__item">
-                <button class="air-item__icon" title="скачать файл">
-                    <img src="{{ asset('img/download-icon.png') }}" alt="">
-                </button>
-                <a href="#" class="air-files__link">
-                    <img src="{{ asset('img/play.png') }}" alt="" class="air-item__img-play">
-                    <img src="{{ asset('img/item-1.png') }}" alt="" class="air-item__image">
-                    <h3 class="air-item__title">Trailer_volk_s_w-s.mp4</h3>
-                </a>
-            </div>
-
-            <div class="air-files__item">
-                <button class="air-item__icon" title="скачать файл">
-                    <img src="{{ asset('img/download-icon.png') }}" alt="">
-                </button>
-                <a href="#" class="air-files__link">
-                    <img src="{{ asset('img/play.png') }}" alt="" class="air-item__img-play">
-                    <img src="{{ asset('img/item-2.png') }}" alt="" class="air-item__image">
-                    <h3 class="air-item__title">davincimovie.mp4</h3>
-                </a>
-            </div>
-
-            <div class="air-files__item">
-                <button class="air-item__icon" title="скачать файл">
-                    <img src="{{ asset('img/download-icon.png') }}" alt="">
-                </button>
-                <a href="#" class="air-files__link">
-                    <img src="{{ asset('img/play.png') }}" alt="" class="air-item__img-play">
-                    <img src="{{ asset('img/item-3.png') }}" alt="" class="air-item__image">
-                    <h3 class="air-item__title">dvmovie2.mp4</h3>
-                </a>
-            </div>
-
+            {% for video in videos %}
+                <div class="air-files__item">
+                    <a href="{{ path('api_playlist_download_videos', { videoId: video.uuid, playlistId: playlist.uuid }) }}" class="air-item__icon" title="скачать файл">
+                        <img src="{{ asset('img/download-icon.png') }}" alt="">
+                    </a>
+                    <a href="#" class="air-files__link">
+                        <img src="{{ asset('img/play.png') }}" alt="" class="air-item__img-play">
+                        <img src="{{ asset('img/item-1.png') }}" alt="" class="air-item__image">
+                        <h3 class="air-item__title">Trailer_volk_s_w-s.mp4</h3>
+                    </a>
+                </div>
+            {% endfor %}
         </div>
 
     </section>
