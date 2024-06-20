@@ -165,6 +165,16 @@ class PlaylistController extends AbstractController
         ], $response);
     }
 
+    #[Route('/w/{playlistId}/{videoId?}', name: 'app_watch_playlist', methods: ['GET'])]
+    public function watch(Request $request, string $playlistId, ?string $videoId): Response
+    {
+        $playlist = $this->playlistRepository->findOneBy(['uuid' => $playlistId]);
+
+        return $this->render('playlist/watch.html.twig', [
+            'playlist' => $playlist,
+        ]);
+    }
+
     /**
      * @throws Exception
      */
@@ -255,6 +265,7 @@ class PlaylistController extends AbstractController
         }
     }
 
+//    ---------------------------------------
     #[Route('/playlist/upload-success', name: 'app_upload_success', methods: ['GET'])]
     public function uploadSuccess(Request $request): Response
     {

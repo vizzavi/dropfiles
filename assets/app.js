@@ -6,9 +6,9 @@ import './bootstrap.js';
  * which should already be in your base.html.twig.
  */
 import './styles/normalize.css';
-import './styles/app.css';
 import './styles/glide.core.min.css';
 import './styles/glide.theme.min.css';
+import './styles/app.css';
 
 // import  './js/glide.js'
 import  './js/custom.js'

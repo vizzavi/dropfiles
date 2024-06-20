@@ -45,6 +45,9 @@ generage-mercure-jwt-secret:
 
 #------------------------------------------------
 
+vendor-install:
+	bin/console importmap:install
+
 asset-compile-for-prod:
 	bin/console asset-map:compile
 
