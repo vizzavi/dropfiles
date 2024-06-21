@@ -170,8 +170,11 @@ class PlaylistController extends AbstractController
     {
         $playlist = $this->playlistRepository->findOneBy(['uuid' => $playlistId]);
 
+        $isPlaylistOwner = $this->playlistService->isPlaylistOwner($request->getSession());
+
         return $this->render('playlist/watch.html.twig', [
             'playlist' => $playlist,
+            'isPlaylistOwner' => $isPlaylistOwner,
         ]);
     }
 

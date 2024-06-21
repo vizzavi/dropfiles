@@ -2,8 +2,8 @@
 
 namespace App\Service;
 
+use App\DTO\ProcessVideoOutput;
 use App\Message\Video\VideoProcessingMessege;
-use App\Repository\VideoRepository;
 use App\ValueObject\FileSize;
 use FFMpeg\Coordinate\TimeCode;
 use FFMpeg\FFMpeg;
@@ -16,29 +16,36 @@ use Symfony\Component\Process\Exception\ProcessFailedException;
 readonly class VideoService
 {
     private const int VIDEO_WIDTH                = 1280;
-    private const int POSTER_WIDTH               = 1280;
-    private const int POSTER_HEIGHT              = 720;
+    private const int POSTER_WIDTH               = 500;
+    private const int POSTER_HEIGHT              = 500;
     private const int POSTER_COMPRESSION_QUALITY = 85;
 
 
-    public function __construct(private FFMpeg $ffmpeg, private VideoRepository $videoRepository)
+    public function __construct(private FFMpeg $ffmpeg)
     {
     }
 
-    public function processVideo(VideoProcessingMessege $messege): FileSize
+    public function processVideo(VideoProcessingMessege $message): ProcessVideoOutput
     {
-        $video = $this->ffmpeg->open($messege->videoInputPath);
+        $video = $this->ffmpeg->open($message->videoInputPath);
 
-        $this->createVideoPoster($video, $messege->videoOutputPath);
+        $posterPath = $this->createVideoPoster($video, $message->videoOutputPath);
 
-        $outputPath = sprintf('%s/%s.mp4', $messege->videoOutputPath, $messege->videoName);
-        $this->convertVideo($video, $outputPath);
+        $outputPath = sprintf('%s/%s.mp4', $message->videoOutputPath, $message->videoName);
+        $videoPath = $this->convertVideo($video, $outputPath);
 
-        return new FileSize(filesize($outputPath), FileSize::UNIT_BYTE);
+        return new ProcessVideoOutput(
+            new FileSize(filesize($outputPath), FileSize::UNIT_BYTE),
+            $posterPath,
+            $videoPath
+        );
     }
 
-    public function convertVideo(Video $video, string $outputPath): void
+    public function convertVideo(Video $video, string $outputPath): string
     {
+        # -vcodec libx265 - по гуглить компрессию
+        # '-vf', 'scale=640:360',
+
         // Настройка формата для сжатия видео
         $format = new X264();
         $format->setKiloBitrate(800); // Установка битрейта
@@ -55,9 +62,11 @@ readonly class VideoService
         ]);
 
         $video->save($format, $outputPath);
+
+        return $outputPath;
     }
 
-    public function createVideoPoster(Video $video, string $outputPath): void
+    public function createVideoPoster(Video $video, string $outputPath): string
     {
         $posterPath = $outputPath . '/poster.jpg';
 
@@ -67,6 +76,8 @@ readonly class VideoService
         try {
             $this->compressImage($posterPath);
         } catch (ProcessFailedException|ImagickException $e) {}
+
+        return $posterPath;
     }
 
     /**

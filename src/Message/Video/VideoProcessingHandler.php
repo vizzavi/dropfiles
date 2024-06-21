@@ -40,10 +40,14 @@ readonly class VideoProcessingHandler
         // Сохранение сущности Video после изменения состояния
         $this->entityManager->flush();
 
-        $outputFileSize = $this->videoService->processVideo($message);
+        $videoOutput = $this->videoService->processVideo($message);
 
         $workflow->apply($video, 'complete');
-        $video->setSize($outputFileSize->convertTo(FileSize::UNIT_KILOBYTE));
+        $video
+            ->setSize($videoOutput->fileSize->convertTo(FileSize::UNIT_KILOBYTE))
+            ->setImagePreview($videoOutput->posterPath)
+            ->setPath($videoOutput->videoPath)
+        ;
 
         $this->entityManager->persist($video);
         $this->entityManager->flush();
