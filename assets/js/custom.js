@@ -149,22 +149,22 @@ if (infoButton && cartElement) {
 
 var animationTimeout;
 
-// Функция для анимации текста
-function typeText(textElement, text) {
-    var index = 0;
-    var htmlText = '';
-
-    function animate() {
-        if (index < text.length) {
-            htmlText += text.charAt(index);
-            textElement.innerHTML = htmlText;
-            index++;
-            animationTimeout = setTimeout(animate, 13);
-        }
-    }
-
-    animate();
-}
+// // Функция для анимации текста
+// function typeText(textElement, text) {
+//     var index = 0;
+//     var htmlText = '';
+//
+//     function animate() {
+//         if (index < text.length) {
+//             htmlText += text.charAt(index);
+//             textElement.innerHTML = htmlText;
+//             index++;
+//             animationTimeout = setTimeout(animate, 13);
+//         }
+//     }
+//
+//     animate();
+// }
 
 // Функция для остановки текущей анимации
 function stopAnimation() {

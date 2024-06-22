@@ -16,6 +16,16 @@ class VideoRepository extends ServiceEntityRepository
         parent::__construct($registry, Video::class);
     }
 
+    public function updateViews(Video $video): void
+    {
+        $video->setViews(($video->getViews() ?? 0) + 1);
+
+        $em = $this->getEntityManager();
+        $em->persist($video);
+        $em->flush();
+
+    }
+
     //    /**
     //     * @return Video[] Returns an array of Video objects
     //     */

@@ -4,9 +4,15 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Entity\Video;
 use App\Repository\VideoRepository;
+use DateTimeImmutable;
+use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\Cookie;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Attribute\Route;
@@ -37,6 +43,32 @@ class VideoController extends AbstractController
         }
 
         return $this->file($fullPath);
+    }
+
+    #[Route('/api/video/{videoId}/update-views', name: 'video_update_views', methods: ['POST'])]
+    public function updateViews(
+        #[MapEntity(expr: 'repository.find(videoId)')]
+        Video $video,
+        Request $request,
+    ): Response {
+        $sessionId = 'video_viewed_' . $video->getUuid()->toRfc4122();
+        $session = $request->getSession();
+
+        # Получить кол. и вернуть знач.
+
+        if ($session->has($sessionId)) {
+            $value = $session->get($sessionId);
+            $responseData = ['message' => 'Session exists', 'value' => $value];
+            return new JsonResponse($responseData);
+        }
+
+        $this->videoRepository->updateViews($video);
+
+        $newValue = '1';
+        $session->set($sessionId, $newValue);
+
+        $responseData = ['message' => 'New session set', 'value' => $newValue];
+        return new JsonResponse($responseData);
     }
 
 //$fullPath = $this->getParameter('kernel.project_dir' . 'assets/img/load.png');

@@ -161,7 +161,8 @@ class PlaylistController extends AbstractController
             'playlist' => $playlist,
             'playlistTitle' => $playlistTitle,
             'allVideosSize' => $allVideosSize,
-            'videos' => $videos
+            'videos' => $videos,
+            'playlistId' => $playlistId,
         ], $response);
     }
 
@@ -205,7 +206,6 @@ class PlaylistController extends AbstractController
              return new JsonResponse(['status' => 'Ошибка удаления плейлиста'], 400);
         }
 
-
         return new JsonResponse(['status' => 'Плейлист удален'], 200);
     }
 
@@ -216,7 +216,7 @@ class PlaylistController extends AbstractController
             /** @var Video $video */
             $video = $this->videoRepository->findOneBy(['uuid' => $videoId]);
 
-            $filePath = $video->getPath() . '/' . $video->getName() . '.mp4';
+            $filePath = $video->getPath();
 
             if (!file_exists($filePath)) {
                 throw $this->createNotFoundException('The file does not exist');
@@ -242,7 +242,7 @@ class PlaylistController extends AbstractController
             }
 
             foreach ($playlist->getVideos() as $video) {
-                $filePath = $video->getPath() . '/' . $video->getName() . '.mp4';
+                $filePath = $video->getPath();
 
                 if (!$this->filesystem->exists($filePath)) {
                     throw $this->createNotFoundException('Video file not found: ' . $video->getName());
@@ -259,7 +259,7 @@ class PlaylistController extends AbstractController
             });
 
             $response->headers->set('Content-Type', 'application/zip');
-            $response->headers->set('Content-Disposition', 'attachment; filename="' . $downloadFileName . '"playlist.zip"');
+            $response->headers->set('Content-Disposition', 'attachment; filename="' . $downloadFileName);
             $response->headers->set('Content-Length', filesize($zipFileName));
 
             return $response;

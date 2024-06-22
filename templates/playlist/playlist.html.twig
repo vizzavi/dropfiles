@@ -8,7 +8,7 @@
 
 {#    {{ stimulus_controller('playlist') }}#}
     <section class="air-bread">
-        <div class="air-bread__left">{{ playlistTitle }}</div>
+        <div class="air-bread__left"><a href="/w/{{playlistId}}" target="_self">{{ playlistTitle }}</a></div>
         <div class="air-bread__right">
 
             {% if isPlaylistOwner %}
@@ -57,12 +57,10 @@
 {# If статус === completed тогда показывать картинку иначе лоадер, и через меркурий (или через ajax пулингом спрашивать когда готово?))               #}
                 <div class="air-files__item">
                     <a href="{{ path('api_playlist_download_videos', { videoId: video.uuid, playlistId: playlist.uuid }) }}" class="air-item__icon" title="скачать файл">
-{#                        <img src="{{ asset('img/download-icon.png') }}" alt="">#}
                         <img src="{{ asset('img/download-icon.png') }}" alt="">
                     </a>
                     <a href="#" class="air-files__link">
                         <img src="{{ asset('img/play.png') }}" alt="" class="air-item__img-play">
-{#                        <img src="{{ asset('img/item-1.png') }}" alt="" class="air-item__image">#}
                         <img src="{{path('private_video_poster', {videoId: video.uuid}) }}" alt="" class="air-item__image">
                         <h3 class="air-item__title">Trailer_volk_s_w-s.mp4</h3>
                     </a>
