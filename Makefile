@@ -38,7 +38,8 @@ logs-%:
 	docker compose logs -f $*
 
 messenger:
-	 bin/console messenger:consume async -vv
+	docker compose exec php-fpm php bin/console messenger:consume async -vv
+	# bin/console messenger:consume async -vv
 
 generage-mercure-jwt-secret:
 	openssl rand -base64 32

@@ -72,6 +72,14 @@ services:
         - mercure_data:/data
         - ./docker/mercure/Caddyfile.dev:/etc/caddy/Caddyfile.dev
 
+    ngrok:
+      image: wernight/ngrok
+      command: ngrok http webserver:80
+      ports:
+        - '4040:4040'
+      environment:
+        NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN}
+
 volumes:
     database_data:
     mercure_data:

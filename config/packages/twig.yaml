@@ -3,6 +3,8 @@ twig:
     default_path: '%kernel.project_dir%/templates'
     paths:
         '%kernel.project_dir%/templates/bundles/TwigBundle/Exception': TwigBundle
+    globals:
+        app_url: '%app.url%'
 
 when@test:
     twig:

@@ -1,0 +1,5 @@
+#EasyAdminBundle:
+#  field:
+#    boolean:
+#      yes: 'Да'
+#      no: 'Нет'
