@@ -126,15 +126,14 @@
 
             <h3 class="air-cart__right-h3">Доступ</h3>
 
-            <div class="air-cart__right-copy">
+            <div class="air-cart__right-copy" style="grid-template-columns: 1fr auto 1fr">
                 <div class="air-cart__right-copy-icon">
                     <img src="{{ asset('img/сopy-icon.png') }}" alt="ссылка для скачивания" class="air-download-link__icon">
                 </div>
 
-                <a href="https://files.davinci.pm/C5Lzn5Q#432223" title="Перейти для скачивания"
-                   class="air-cart__right-copy-title">
-                    {{ app_url ~ videos.0.linkForDownloading  }}
-                </a>
+                <div class="air-download-link__url air-cart__right-copy-title" >{{ app_url ~ videos.0.linkForDownloading }}</div>
+                <div class="air-download-link__copy">Скопировать</div>
+
             </div>
 
             <hr>
@@ -240,6 +239,7 @@
                         var views = activeSlide.getAttribute('data-views');
                         var downloads = activeSlide.getAttribute('data-downloads');
 
+                        console.log(copyTitle);
                         copyTitle.setAttribute('href', link);
 
                         typeText(countRight, title);
