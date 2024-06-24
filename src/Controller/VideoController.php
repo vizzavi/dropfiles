@@ -6,11 +6,8 @@ namespace App\Controller;
 
 use App\Entity\Video;
 use App\Repository\VideoRepository;
-use DateTimeImmutable;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
-use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -34,6 +31,28 @@ class VideoController extends AbstractController
             }
 
             $fullPath = $video->getImagePreview();
+
+            if (!file_exists($fullPath)) {
+                throw $this->createNotFoundException('File not found');
+            }
+        } catch (NotFoundHttpException $e) {
+            return new Response($e->getMessage(), Response::HTTP_NOT_FOUND);
+        }
+
+        return $this->file($fullPath);
+    }
+
+    #[Route('/api/video/{videoId}/watch', name: 'private_video_watch', methods: ['GET'])]
+    public function video(string $videoId): Response
+    {
+        $video = $this->videoRepository->find($videoId);
+
+        try {
+            if (!$video) {
+                throw $this->createNotFoundException('Video not found');
+            }
+
+            $fullPath = $video->getPath();
 
             if (!file_exists($fullPath)) {
                 throw $this->createNotFoundException('File not found');
@@ -71,11 +90,4 @@ class VideoController extends AbstractController
         return new JsonResponse($responseData);
     }
 
-//$fullPath = $this->getParameter('kernel.project_dir' . 'assets/img/load.png');
-
-//    #[Route('/api/video/{path}')]
-//    public function video(): Response
-//    {
-//        //
-//    }
 }

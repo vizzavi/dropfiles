@@ -28,6 +28,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use ZipArchive;
@@ -41,6 +42,7 @@ class PlaylistController extends AbstractController
         private readonly VideoRepository $videoRepository,
         private readonly MercureService $mercureService,
         private readonly Filesystem $filesystem,
+        private readonly UrlGeneratorInterface $urlGenerator,
     ) {
     }
 
@@ -126,8 +128,9 @@ class PlaylistController extends AbstractController
             return $this->redirectToRoute('app_upload_success');
         }
 
+//        'https://files.davinci.pm/'
         return $this->render('playlist/index.html.twig', [
-            'link_for_downloading' => 'https://files.davinci.pm/' . $playlistId,
+            'link_for_downloading' => 'http://localhost:8080/' . $playlistId,
             'playlistId' => $playlistId,
             'form' => $form->createView(),
         ]);
@@ -142,6 +145,11 @@ class PlaylistController extends AbstractController
             throw $this->createNotFoundException('The playlist does not exist');
         }
 
+//        $session = $request->getSession();
+//        dd($session->has('playlistId'), $session->get('playlistId'));
+
+//        ch6b0mo5o5i3efo25pel8g6959
+
         $response = new Response();
         if (! $request->cookies->get('playlist_visited')) {
             $cookie = new Cookie('playlist_visited', true, new DateTimeImmutable('+1 hour'));
@@ -150,6 +158,7 @@ class PlaylistController extends AbstractController
             $this->playlistRepository->updatePageViewed($playlist);
         }
 
+//        dd($request->getSession());
         $isPlaylistOwner = $this->playlistService->isPlaylistOwner($request->getSession());
 
         $videos = $playlist->getVideos();
@@ -173,9 +182,40 @@ class PlaylistController extends AbstractController
 
         $isPlaylistOwner = $this->playlistService->isPlaylistOwner($request->getSession());
 
+        $videos = $playlist?->getVideos();
+
+        $videosPrepare = [];
+
+        foreach ($videos as $video) {
+            $size = new FileSize($video->getSize() ?? 0, FileSize::UNIT_KILOBYTE);
+            $videoSize = $size->convertTo(FileSize::UNIT_MEGABYTE) . ' ' .FileSize::UNIT_MEGABYTE;
+
+            $posterUrl = $this->urlGenerator->generate('private_video_poster', [
+                'videoId' => $video->getUuid()->toRfc4122()
+            ]);
+
+            $videoUrl = $this->urlGenerator->generate('private_video_watch', [
+                'videoId' => $video->getUuid()->toRfc4122()
+            ]);
+
+            $videosPrepare[] = [
+                'uuid' => $video->getUuid()->toRfc4122(),
+                'deletionDate' => $video->getDeletionDate()->format('Y-m-d H:i:s'),
+                'views' => $video->getViews() ?? 0,
+                'downloads' => $video->getDownloads() ?? 0,
+                'size' => $videoSize,
+                'name' => $video->getName(),
+                'posterUrl' => $posterUrl,
+                'videoUrl' => $videoUrl,
+                'linkForDownloading' => 'w/' . $playlist->getUuid()->toRfc4122() . '/' . $video->getUuid()->toRfc4122(),
+            ];
+        }
+
         return $this->render('playlist/watch.html.twig', [
             'playlist' => $playlist,
             'isPlaylistOwner' => $isPlaylistOwner,
+            'activeVideoId' => $videoId,
+            'videos' => $videosPrepare,
         ]);
     }
 

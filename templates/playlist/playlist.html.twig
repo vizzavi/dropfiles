@@ -11,6 +11,9 @@
         <div class="air-bread__left"><a href="/w/{{playlistId}}" target="_self">{{ playlistTitle }}</a></div>
         <div class="air-bread__right">
 
+{#            Тут баг с сесиией и владельцес#}
+{#            {{ dump(isPlaylistOwner) }}#}
+
             {% if isPlaylistOwner %}
                 <button title="Удалить"
                         class="air-bread__item air-bread__desc air-bread__delete"
@@ -59,7 +62,7 @@
                     <a href="{{ path('api_playlist_download_videos', { videoId: video.uuid, playlistId: playlist.uuid }) }}" class="air-item__icon" title="скачать файл">
                         <img src="{{ asset('img/download-icon.png') }}" alt="">
                     </a>
-                    <a href="#" class="air-files__link">
+                    <a href="{{ path('app_watch_playlist', { videoId: video.uuid, playlistId: playlist.uuid }) }}" class="air-files__link">
                         <img src="{{ asset('img/play.png') }}" alt="" class="air-item__img-play">
                         <img src="{{path('private_video_poster', {videoId: video.uuid}) }}" alt="" class="air-item__image">
                         <h3 class="air-item__title">Trailer_volk_s_w-s.mp4</h3>
