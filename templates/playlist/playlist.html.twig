@@ -57,7 +57,6 @@
 
         <div class="air-section__files air-section__archive-block">
             {% for video in videos %}
-{# If статус === completed тогда показывать картинку иначе лоадер, и через меркурий (или через ajax пулингом спрашивать когда готово?))               #}
                 <div class="air-files__item">
                     <a href="{{ path('api_playlist_download_videos', { videoId: video.uuid, playlistId: playlist.uuid }) }}" class="air-item__icon" title="скачать файл">
                         <img src="{{ asset('img/download-icon.png') }}" alt="">
@@ -65,7 +64,7 @@
                     <a href="{{ path('app_watch_playlist', { videoId: video.uuid, playlistId: playlist.uuid }) }}" class="air-files__link">
                         <img src="{{ asset('img/play.png') }}" alt="" class="air-item__img-play">
                         <img src="{{path('private_video_poster', {videoId: video.uuid}) }}" alt="" class="air-item__image">
-                        <h3 class="air-item__title">Trailer_volk_s_w-s.mp4</h3>
+                        <h3 class="air-item__title">{{ video.name }}</h3>
                     </a>
                 </div>
             {% endfor %}

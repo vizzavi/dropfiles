@@ -23,10 +23,8 @@ readonly class VideoProcessingHandler
 
     public function __invoke(VideoProcessingMessege $message): void
     {
-        $video = $this->entityManager
-            ->getRepository(Video::class)
-            ->findOneBy([
-                'uuid' => $message->videoId,
+        $video = $this->entityManager->getRepository(Video::class)->findOneBy([
+                'uuid'     => $message->videoId,
                 'playlist' => $message->playListId
             ])
         ;
@@ -36,18 +34,37 @@ readonly class VideoProcessingHandler
         }
 
         $workflow = $this->workflowRegistry->get($video, 'video_processing');
-        $workflow->apply($video, 'start_processing');
+
+        if ($workflow->can($video, 'start_processing')) {
+            $workflow->apply($video, 'start_processing');
+        }
+        else {
+            throw new \LogicException('Video cannot be processed.');
+        }
         // Сохранение сущности Video после изменения состояния
         $this->entityManager->flush();
 
-        $videoOutput = $this->videoService->processVideo($message);
+        try {
+            $videoOutput = $this->videoService->processVideo($message);
 
-        $workflow->apply($video, 'complete');
-        $video
-            ->setSize($videoOutput->fileSize->convertTo(FileSize::UNIT_KILOBYTE))
-            ->setImagePreview($videoOutput->posterPath)
-            ->setPath($videoOutput->videoPath)
-        ;
+            if ($workflow->can($video, 'complete')) {
+                $workflow->apply($video, 'complete');
+            }
+            else {
+                throw new \LogicException('Video cannot be completed.');
+            }
+
+            $video->setSize($videoOutput->fileSize->convertTo(FileSize::UNIT_KILOBYTE))
+                  ->setImagePreview($videoOutput->posterPath)
+                  ->setPath($videoOutput->videoPath)
+            ;
+        } catch (\Exception $e) {
+            // Применяем переход 'fail' в случае ошибки
+            if ($workflow->can($video, 'fail')) {
+                $workflow->apply($video, 'fail');
+            }
+            throw $e;
+        }
 
         $this->entityManager->persist($video);
         $this->entityManager->flush();

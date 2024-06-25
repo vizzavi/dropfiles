@@ -6,8 +6,10 @@ namespace App\Controller;
 
 use App\Entity\Video;
 use App\Repository\VideoRepository;
+use DateTimeImmutable;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -70,24 +72,25 @@ class VideoController extends AbstractController
         Video $video,
         Request $request,
     ): Response {
-        $sessionId = 'video_viewed_' . $video->getUuid()->toRfc4122();
-        $session = $request->getSession();
+        $cookieName = 'video_viewed_' . $video->getUuid()->toRfc4122();
+        $cookieValue = $request->cookies->get($cookieName);
 
-        # Получить кол. и вернуть знач.
-
-        if ($session->has($sessionId)) {
-            $value = $session->get($sessionId);
-            $responseData = ['message' => 'Session exists', 'value' => $value];
+        if ($cookieValue) {
+            $responseData = ['message' => 'Cookie exists', 'value' => $cookieValue];
             return new JsonResponse($responseData);
         }
 
         $this->videoRepository->updateViews($video);
 
-        $newValue = '1';
-        $session->set($sessionId, $newValue);
+        $cookie = new Cookie(
+            'video_viewed_', $video->getUuid()->toRfc4122(),
+            new DateTimeImmutable('+1 hour')
+        );
 
-        $responseData = ['message' => 'New session set', 'value' => $newValue];
-        return new JsonResponse($responseData);
+        $responseData = ['message' => 'New session set', 'value' => $cookie->getValue()];
+        $response = new JsonResponse($responseData);
+        $response->headers->setCookie($cookie);
+
+        return $response;
     }
-
 }

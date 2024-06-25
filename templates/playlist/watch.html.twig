@@ -23,6 +23,7 @@
         <div class="air-bread__right">
 
             {% if isPlaylistOwner %}
+{# TODO: Тут должен быть js - удаление  #}
                 <button title="Удалить"
                         class="air-bread__item air-bread__desc air-bread__delete"
                         data-controller="playlist"
@@ -30,7 +31,7 @@
                         data-url="{{ path('api_playlist_delete', { playlistId: playlist.uuid }) }}"
                 >
                     <img src="{{ asset('img/delete.png') }}" alt="" class="air-bread__ic">
-                    <span>Удалить</span>
+                    <span>Удалить видео</span>
                 </button>
             {% endif %}
 
@@ -174,89 +175,5 @@
     </footer>
 
     <script src="{{ asset('js/glide.js') }}"></script>
-    <script>
-        var animationTimeout;
-
-        function typeText(textElement, text) {
-            var index = 0;
-            var htmlText = '';
-
-            function animate() {
-                if (index < text.length) {
-                    htmlText += text.charAt(index);
-                    textElement.innerHTML = htmlText;
-                    index++;
-                    animationTimeout = setTimeout(animate, 13);
-                }
-            }
-
-            animate();
-        }
-
-        var element_glide = document.getElementById('slider-single');
-
-        if (element_glide) {
-
-            var countRight = document.querySelector('.air-bread__count-right');
-            var fileTitle = document.querySelector('.air-cart__right-file-title');
-            var copyTitle = document.querySelector('.air-cart__right-copy-title');
-            var liData = document.querySelector('.air-cart__right-li-data');
-            var liSize = document.querySelector('.air-cart__right-li-size');
-            var liViews = document.querySelector('.air-cart__right-li-views');
-            var liDownload = document.querySelector('.air-cart__right-li-download');
-
-            var element_gl = new Glide('#slider-single', {
-
-                type: 'slider',
-                perView: 1,
-                autoplay: false,
-                hoverpause: true,
-                animationTimingFunc: 'cubic-bezier(0.165, 0.840, 0.440, 1.000)',
-                animationDuration: 400,
-                arrows: false,
-                gap: 0
-            });
-
-            element_gl.mount();
-
-            element_gl.on(['run.after'], function () {
-                var currentSlide = element_gl.index;
-                // находим элемент с классом "air-bread__count" и устанавливаем номер текущего слайда
-                var counterElement = document.querySelector('.air-bread__count');
-                if(counterElement) {
-                    counterElement.textContent = currentSlide + 1; // +1 т.к. индексация слайдов с 0
-                }
-
-                setTimeout(function() {
-                    var activeSlide = document.querySelector('.glide__slide--active');
-
-                    if(activeSlide) {
-                        var title = activeSlide.getAttribute('data-title');
-                        var link = activeSlide.getAttribute('data-link');
-
-                        var day = activeSlide.getAttribute('data-day');
-                        var size = activeSlide.getAttribute('data-size');
-                        var views = activeSlide.getAttribute('data-views');
-                        var downloads = activeSlide.getAttribute('data-downloads');
-
-                        console.log(copyTitle);
-                        copyTitle.setAttribute('href', link);
-
-                        typeText(countRight, title);
-                        typeText(fileTitle, title);
-
-                        typeText(copyTitle, link);
-                        typeText(liData, day);
-                        typeText(liSize, size);
-                        typeText(liViews, views);
-                        typeText(liDownload, downloads);
-                    }
-                }, 100);
-
-            });
-
-        }
-
-    </script>
     </body>
 {% endblock %}
