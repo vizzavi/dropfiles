@@ -21,9 +21,7 @@
         </div>
 
         <div class="air-bread__right">
-
             {% if isPlaylistOwner %}
-{# TODO: Тут должен быть js - удаление  #}
                 <button title="Удалить"
                         class="air-bread__item air-bread__desc air-bread__delete"
                         data-controller="playlist"
@@ -40,10 +38,15 @@
                 <span>Поделиться</span>
             </button>
 
-            <a href="{{ path('api_playlist_download_videos', { playlistId: playlist.uuid }) }}" title="Скачать все" class="air-bread__item air-bread__download">
+            <button data-controller="playlist"
+                    data-playlist-id="{{ playlist.uuid }}"
+                    data-action="click->playlist#downloadPlaylist"
+                    title="Скачать все"
+                    class="air-bread__item air-bread__download"
+            >
                 <img src="{{ asset('img/download-green.png') }}" alt="" class="air-bread__ic">
                 <span>Скачать все</span>
-            </a>
+            </button>
 
             <button title="Информация" class="air-bread__item air-bread__mob air-bread__info">
                 <span>Информация</span>
