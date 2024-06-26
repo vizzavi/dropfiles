@@ -28,10 +28,15 @@
                 <span>Поделиться</span>
             </button>
 
-            <a href="{{ path('api_playlist_download_videos', { playlistId: playlist.uuid }) }}" title="Скачать все" class="air-bread__item air-bread__download">
+            <button data-controller="playlist"
+                    data-playlist-id="{{ playlist.uuid }}"
+                    data-action="click->playlist#downloadPlaylist"
+                    title="Скачать все"
+                    class="air-bread__item air-bread__download"
+            >
                 <img src="{{ asset('img/download-green.png') }}" alt="" class="air-bread__ic">
                 <span>Скачать все</span>
-            </a>
+            </button>
 
             <button title="Информация" class="air-bread__item air-bread__mob air-bread__info">
                 <span>Информация</span>
@@ -55,9 +60,15 @@
         <div class="air-section__files air-section__archive-block">
             {% for video in videos %}
                 <div class="air-files__item">
-                    <a href="{{ path('api_playlist_download_videos', { videoId: video.uuid, playlistId: playlist.uuid }) }}" class="air-item__icon" title="скачать файл">
+                    <button data-controller="video"
+                            data-video-id="{{ video.uuid }}"
+                            data-playlist-id="{{ playlist.uuid }}"
+                            data-action="click->video#downloadVideo"
+                            class="air-item__icon" title="скачать файл"
+                    >
                         <img src="{{ asset('img/download-icon.png') }}" alt="">
-                    </a>
+                    </button>
+
                     <a href="{{ path('app_watch_playlist', { videoId: video.uuid, playlistId: playlist.uuid }) }}" class="air-files__link">
                         <img src="{{ asset('img/play.png') }}" alt="" class="air-item__img-play">
                         <img src="{{path('private_video_poster', {videoId: video.uuid}) }}" alt="" class="air-item__image">

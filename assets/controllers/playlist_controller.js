@@ -6,8 +6,6 @@ export default class extends Controller {
 
         const url = this.element.dataset.url;
 
-        console.log(url);
-
         fetch(url, {
             method: 'DELETE',
             headers: {
@@ -28,4 +26,10 @@ export default class extends Controller {
             });
     }
 
+    downloadPlaylist(event) {
+        event.preventDefault();
+        const playlistId = this.element.dataset.playlistId;
+
+        window.location.href = `/api/playlist/${playlistId}/download`;
+    }
 }

@@ -80,7 +80,7 @@ class VideoController extends AbstractController
             return new JsonResponse($responseData);
         }
 
-        $this->videoRepository->updateViews($video);
+        $this->videoRepository->incrementViews($video);
 
         $cookie = new Cookie(
             'video_viewed_', $video->getUuid()->toRfc4122(),

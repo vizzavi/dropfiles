@@ -196,14 +196,22 @@ class PlaylistController extends AbstractController
         if ($videoId !== null) {
             /** @var Video $video */
             $video = $this->videoRepository->findOneBy(['uuid' => $videoId]);
-
             $filePath = $video->getPath();
 
-            if (!file_exists($filePath)) {
+            if (! file_exists($filePath)) {
                 throw $this->createNotFoundException('The file does not exist');
             }
 
-            return $this->file($filePath);
+            $this->videoRepository->incrementDownloads($video);
+
+            $response = $this->file($filePath);
+            $response->headers->set('Content-Type', 'video/mp4');
+            $response->headers->set('Content-Disposition', 'attachment; filename="' . basename($filePath) . '"');
+            $response->headers->set('Cache-Control', 'no-cache, no-store, must-revalidate');
+            $response->headers->set('Pragma', 'no-cache');
+            $response->headers->set('Expires', '0');
+
+            return $response;
         }
 
         $playlist = $this->playlistRepository->findOneBy(['uuid' => $playlistId]);
@@ -230,6 +238,7 @@ class PlaylistController extends AbstractController
                 }
 
                 $zip->addFile($filePath, $video->getName() . '.mp4');
+                $this->videoRepository->incrementDownloads($video);
             }
 
             $zip->close();
@@ -242,6 +251,9 @@ class PlaylistController extends AbstractController
             $response->headers->set('Content-Type', 'application/zip');
             $response->headers->set('Content-Disposition', 'attachment; filename="' . $downloadFileName);
             $response->headers->set('Content-Length', filesize($zipFileName));
+            $response->headers->set('Cache-Control', 'no-cache, no-store, must-revalidate');
+            $response->headers->set('Pragma', 'no-cache');
+            $response->headers->set('Expires', '0');
 
             return $response;
         } catch (IOExceptionInterface $exception) {

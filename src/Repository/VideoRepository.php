@@ -16,14 +16,22 @@ class VideoRepository extends ServiceEntityRepository
         parent::__construct($registry, Video::class);
     }
 
-    public function updateViews(Video $video): void
+    public function incrementViews(Video $video): void
     {
         $video->setViews(($video->getViews() ?? 0) + 1);
 
         $em = $this->getEntityManager();
         $em->persist($video);
         $em->flush();
+    }
 
+    public function incrementDownloads(Video $video): void
+    {
+        $video->setDownloads(($video->getDownloads() ?? 0) + 1);
+
+        $em = $this->getEntityManager();
+        $em->persist($video);
+        $em->flush();
     }
 
     //    /**
