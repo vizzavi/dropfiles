@@ -141,7 +141,7 @@ class PlaylistController extends AbstractController
 
             $videosPrepare[] = [
                 'uuid' => $video->getUuid()->toRfc4122(),
-                'deletionDate' => $video->getDeletionDate()->format('Y-m-d H:i:s'),
+                'deletionDate' => $video->getDeletionDate()?->format('Y-m-d H:i:s') ?? '---',
                 'views' => $video->getViews() ?? 0,
                 'downloads' => $video->getDownloads() ?? 0,
                 'size' => $videoSize,
