@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -90,6 +91,35 @@ class VideoController extends AbstractController
         $responseData = ['message' => 'New session set', 'value' => $cookie->getValue()];
         $response = new JsonResponse($responseData);
         $response->headers->setCookie($cookie);
+
+        return $response;
+    }
+
+    #[Route('/video/{videoId}/popup', name: 'popup_private_video', methods: ['GET'])]
+    public function popupPrivateVideoStream(string $videoId)
+    {
+        $video = $this->videoRepository->findOneBy(['uuid' => $videoId]);
+
+        if (!$video) {
+            throw $this->createNotFoundException('Video not found');
+        }
+
+        $filePath = $video->getPath();
+
+        if (! file_exists($filePath)) {
+            throw $this->createNotFoundException('The file does not exist');
+        }
+
+        $mimeType = mime_content_type($filePath);
+
+        $response = new StreamedResponse(function () use ($filePath) {
+            $fileStream = fopen($filePath, 'rb');
+            fpassthru($fileStream);
+            fclose($fileStream);
+        });
+
+        $response->headers->set('Content-Type', $mimeType);
+        $response->headers->set('Content-Disposition', 'inline; filename="'.basename($filePath).'"');
 
         return $response;
     }

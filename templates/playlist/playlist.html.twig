@@ -3,10 +3,6 @@
 {% block title %}Hello PlaylistController!{% endblock %}
 
 {% block body %}
-
-{#    {{ dump(playlist.createdAt | date('Y-m-d')) }}#}
-
-{#    {{ stimulus_controller('playlist') }}#}
     <section class="air-bread">
         <div class="air-bread__left"><a href="/w/{{playlistId}}" target="_self">{{ playlistTitle }}</a></div>
         <div class="air-bread__right">
@@ -59,7 +55,7 @@
 
         <div class="air-section__files air-section__archive-block">
             {% for video in videos %}
-                <div class="air-files__item">
+                <div class="air-files__item" data-controller="video">
                     <button data-controller="video"
                             data-video-id="{{ video.uuid }}"
                             data-playlist-id="{{ playlist.uuid }}"
@@ -69,9 +65,13 @@
                         <img src="{{ asset('img/download-icon.png') }}" alt="">
                     </button>
 
-                    <a href="{{ path('app_watch_playlist', { videoId: video.uuid, playlistId: playlist.uuid }) }}" class="air-files__link">
+                    <a href="#"
+                       class="air-files__link"
+                       data-video-id="{{ video.uuid }}"
+                       data-action="click->video#openVideo"
+                    >
                         <img src="{{ asset('img/play.png') }}" alt="" class="air-item__img-play">
-                        <img src="{{path('private_video_poster', {videoId: video.uuid}) }}" alt="" class="air-item__image">
+                        <img src="{{ path('private_video_poster', {videoId: video.uuid}) }}" alt="" class="air-item__image">
                         <h3 class="air-item__title">{{ video.name }}</h3>
                     </a>
                 </div>
@@ -86,5 +86,4 @@
             Без регистрации, скорость загрузки и скачивания не ограничена.
         </p>
     </footer>
-
 {% endblock %}

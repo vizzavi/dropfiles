@@ -25,4 +25,10 @@ return [
     '@hotwired/turbo' => [
         'version' => '7.3.0',
     ],
+    '@fancyapps/ui' => [
+        'version' => '5.0.36',
+    ],
+    'glide' => [
+        'path' => './assets/js/glide.min.js',
+    ]
 ];
